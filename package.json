@@ -33,6 +33,7 @@
 		"express": "^5.2.1",
 		"jsonwebtoken": "^9.0.3",
 		"mongodb": "^7.1.0",
+		"mongoose-paginate-v2": "^1.9.1",
 		"pino": "^10.3.1",
 		"pino-http": "^11.0.0",
 		"swagger-ui-express": "^5.0.1",

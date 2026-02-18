@@ -1,5 +1,4 @@
 import type { ZodType } from "zod";
-import { ZodError } from "zod";
 
 export const decode = <T>(schema: ZodType<unknown>, input: unknown): T => {
 	const result = schema.safeParse(input);
@@ -8,5 +7,3 @@ export const decode = <T>(schema: ZodType<unknown>, input: unknown): T => {
 
 	return result.data as T;
 };
-
-export { ZodError };

@@ -1,3 +1,9 @@
 import type { User } from "../../../types/user.type";
 
-export type UpdateUserPassword = Pick<User.Schema, "password">;
+type Type = Pick<User.Create, "password">;
+
+export class UpdateUserPassword {
+	password: string;
+}
+
+const _typeCheck: Type = {} as UpdateUserPassword;

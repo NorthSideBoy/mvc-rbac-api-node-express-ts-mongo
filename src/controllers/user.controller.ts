@@ -17,11 +17,13 @@ import type { Result } from "../DTOs/operation/output/result.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
 import type { LoginUser } from "../DTOs/user/input/login-user.dto";
 import type { RegisterUser } from "../DTOs/user/input/register-user.dto";
-import type { UpdateUser } from "../DTOs/user/input/update-user.dto";
+import type { UpdateUserEmail } from "../DTOs/user/input/update-user-email.dto";
 import type { UpdateUserPassword } from "../DTOs/user/input/update-user-password.dto";
+import type { UpdateUserProfile } from "../DTOs/user/input/update-user-profile.dto";
 import type { UpdateUserRole } from "../DTOs/user/input/update-user-role.dto";
 import type { UpdateUserStatus } from "../DTOs/user/input/update-user-status.dto";
-import type { AuthenticatedUser } from "../DTOs/user/output/auth-user.dto";
+import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username.dto";
+import type { AuthenticatedUser } from "../DTOs/user/output/authenticated-user.dto";
 import type { User } from "../DTOs/user/output/user.dto";
 import { Role } from "../rbac/role";
 import { UserService } from "../services/user.service";
@@ -65,16 +67,6 @@ export class UserController extends Controller {
 		return this.userService.login(body);
 	}
 
-	@Get("/test")
-	@SuccessResponse(200)
-	@Response(400, "BadRequest")
-	@Response(401, "Unauthorized")
-	@Response(500, "InternalServerError")
-	@Security("Bearer", [Role.ADMIN])
-	async test(@Request() _request: ExtendedRequest): Promise<boolean> {
-		return true;
-	}
-
 	/**
 	 * @summary Get user by id
 	 */
@@ -89,6 +81,18 @@ export class UserController extends Controller {
 		@Request() request: ExtendedRequest,
 	): Promise<User | null> {
 		return this.userService.findById(id, request.access);
+	}
+
+	/**
+	 * @summary Get users
+	 */
+	@Get("/")
+	@SuccessResponse(200)
+	@Response(401, "Unauthorized")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	async findAll(@Request() request: ExtendedRequest): Promise<User[]> {
+		return this.userService.findAll(request.access);
 	}
 
 	/**
@@ -111,7 +115,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Update user by id
+	 * @summary Update user profile by id
 	 */
 	@Put("/{id}")
 	@SuccessResponse(200)
@@ -124,10 +128,10 @@ export class UserController extends Controller {
 	@Security("Bearer", [Role.USER])
 	async update(
 		@Path() id: string,
-		@Body() body: UpdateUser | unknown,
+		@Body() body: UpdateUserProfile | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.update(id, body, request.access);
+		return this.userService.updateProfile(id, body, request.access);
 	}
 
 	/**
@@ -185,6 +189,46 @@ export class UserController extends Controller {
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
 		return this.userService.updatePassword(id, body, request.access);
+	}
+
+	/**
+	 * @summary Update user email
+	 */
+	@Put("/{id}/email")
+	@SuccessResponse(200)
+	@Response(400, "BadRequest")
+	@Response(401, "Unauthorized")
+	@Response(404, "NotFound")
+	@Response(409, "Conflict")
+	@Response(422, "UnprocessableEntity")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	async updateEmail(
+		@Path() id: string,
+		@Body() body: UpdateUserEmail | unknown,
+		@Request() request: ExtendedRequest,
+	): Promise<Result> {
+		return this.userService.updateEmail(id, body, request.access);
+	}
+
+	/**
+	 * @summary Update user username
+	 */
+	@Put("/{id}/username")
+	@SuccessResponse(200)
+	@Response(400, "BadRequest")
+	@Response(401, "Unauthorized")
+	@Response(404, "NotFound")
+	@Response(409, "Conflict")
+	@Response(422, "UnprocessableEntity")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	async updateUsername(
+		@Path() id: string,
+		@Body() body: UpdateUserUsername | unknown,
+		@Request() request: ExtendedRequest,
+	): Promise<Result> {
+		return this.userService.updateUsername(id, body, request.access);
 	}
 
 	/**

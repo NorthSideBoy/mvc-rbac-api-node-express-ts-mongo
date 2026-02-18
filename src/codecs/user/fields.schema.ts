@@ -1,15 +1,14 @@
 import { z } from "zod";
-import { Role } from "../../rbac/role";
-import { UpdateRole } from "../../rbac/role";
+import { Role, UpdateRole } from "../../rbac/role";
 
-export const nameSchema = z
+export const firstnameSchema = z
 	.string()
-	.nonempty("Name is required")
-	.min(2, "Name must be at least 2 characters")
-	.max(50, "Name cannot exceed 50 characters")
+	.nonempty("Firstname is required")
+	.min(2, "Firstname must be at least 2 characters")
+	.max(50, "Firstname cannot exceed 50 characters")
 	.refine(
 		(val) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(val),
-		"Name can only contain letters, no spaces allowed",
+		"Firstname can only contain letters, no spaces allowed",
 	)
 	.transform((val) => val.toLowerCase());
 

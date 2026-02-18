@@ -2,29 +2,39 @@ import {
 	type DocumentType,
 	getModelForClass,
 	modelOptions,
+	plugin,
 	pre,
 	prop,
 	type ReturnModelType,
 } from "@typegoose/typegoose";
+import { type Base, TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import type { BeAnObject } from "@typegoose/typegoose/lib/types";
+import type { Types } from "mongoose";
+import paginatePlugin from "mongoose-paginate-v2";
+import { updatedAtPlugin } from "../plugins/updated-at.plugin";
 import { Role } from "../rbac/role";
-import type { User as Types } from "../types/user.type";
+import type { User as UserTypes } from "../types/user.type";
 import { hasher } from "../utils/hasher.util";
 
 @modelOptions({
 	schemaOptions: {
-		timestamps: true,
 		versionKey: false,
 	},
 })
-
 @pre<User>("save", async function () {
-	this.password = await hasher.encrypt(this.password);
+	const isHash = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+	if (!isHash.test(this.password))
+		this.password = await hasher.encrypt(this.password);
 })
+@plugin(paginatePlugin)
+@plugin(updatedAtPlugin)
+export class User extends TimeStamps implements Base {
+	_id!: Types.ObjectId;
 
-export class User {
+	id!: string;
+
 	@prop({ required: true, trim: true })
-	name: string;
+	firstname: string;
 
 	@prop({ required: true, trim: true })
 	lastname: string;
@@ -53,43 +63,25 @@ export class User {
 	@prop({ default: new Date() })
 	updatedAt: Date;
 
-	public get plain(): Types.Schema {
-		const doc = this as unknown as DocumentType<User>;
-		const {
-			name,
-			lastname,
-			username,
-			email,
-			role,
-			password,
-			birthday,
-			enable,
-			createdAt,
-			updatedAt,
-		} = doc;
+	public get plain(): UserTypes.Schema {
 		return {
-			id: doc._id.toString(),
-			name,
-			lastname,
-			username,
-			email,
-			role,
-			password,
-			birthday,
-			enable,
-			createdAt,
-			updatedAt,
+			id: this.id,
+			firstname: this.firstname,
+			lastname: this.lastname,
+			username: this.username,
+			email: this.email,
+			role: this.role,
+			password: this.password,
+			birthday: this.birthday,
+			enable: this.enable,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
 		};
 	}
 
-	public get secure(): Types.Secure {
+	public get secure(): UserTypes.Secure {
 		const { password, ...secure } = this.plain;
 		return secure;
-	}
-
-	public get profile(): Types.Profile {
-		const { id, createdAt, updatedAt, ...profile } = this.secure;
-		return profile;
 	}
 
 	static async findByEmail(
@@ -108,11 +100,13 @@ export class User {
 		return await this.findOne({ username });
 	}
 
-	public async comparePassword(
-		this: DocumentType<User, BeAnObject>,
-		plain: string,
-	): Promise<boolean> {
-		return await hasher.compare(plain, this.password);
+	static async findOneByRole(
+		this: ReturnModelType<typeof User, BeAnObject>,
+		role: Role,
+	) {
+		// biome-ignore lint: Mongoose needs to type 'this'
+		const user = await this.findOne({ role });
+		return user;
 	}
 
 	static async updatePassword(
@@ -125,13 +119,11 @@ export class User {
 		return await this.updateOne({ _id: id }, { password: hash });
 	}
 
-	static async findOneByRole(
-		this: ReturnModelType<typeof User, BeAnObject>,
-		role: Role,
-	) {
-		// biome-ignore lint: Mongoose needs to type 'this'
-		const user = await this.findOne({ role });
-		return user;
+	public async comparePassword(
+		this: DocumentType<User, BeAnObject>,
+		plain: string,
+	): Promise<boolean> {
+		return await hasher.compare(plain, this.password);
 	}
 }
 

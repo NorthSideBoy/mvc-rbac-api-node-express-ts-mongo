@@ -1,4 +1,4 @@
-import Database from "./configs/mongoose.config";
+import { Database } from "./configs/mongoose.config";
 import { logger } from "./utils/logger.util";
 
 export const bootstrap = async (): Promise<void> => {

@@ -3,8 +3,8 @@ import { z } from "zod";
 import {
 	birthdaySchema,
 	emailSchema,
+	firstnameSchema,
 	lastnameSchema,
-	nameSchema,
 	passwordSchema,
 	usernameSchema,
 } from "../codecs/user/fields.schema";
@@ -26,7 +26,7 @@ const envSchema = z.object({
 	PORT: toNumber().default(3000),
 	LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("debug"),
 
-	ADMIN_NAME: nameSchema,
+	ADMIN_FIRSTNAME: firstnameSchema,
 	ADMIN_LASTNAME: lastnameSchema,
 	ADMIN_USERNAME: usernameSchema,
 	ADMIN_EMAIL: emailSchema,
@@ -69,7 +69,7 @@ const buildMongoUrl = (): string => {
 };
 
 const ADMIN: User.Env = {
-	name: e.ADMIN_NAME,
+	firstname: e.ADMIN_FIRSTNAME,
 	lastname: e.ADMIN_LASTNAME,
 	username: e.ADMIN_USERNAME,
 	email: e.ADMIN_EMAIL,

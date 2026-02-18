@@ -3,8 +3,8 @@ import {
 	birthdaySchema,
 	emailSchema,
 	enableSchema,
+	firstnameSchema,
 	lastnameSchema,
-	nameSchema,
 	passwordSchema,
 	roleSchema,
 	usernameSchema,
@@ -12,7 +12,7 @@ import {
 
 export const createUserCodec = z
 	.object({
-		name: nameSchema,
+		firstname: firstnameSchema,
 		lastname: lastnameSchema,
 		username: usernameSchema,
 		email: emailSchema,

@@ -3,15 +3,15 @@ import {
 	birthdaySchema,
 	emailSchema,
 	enableSchema,
+	firstnameSchema,
 	lastnameSchema,
-	nameSchema,
 	passwordSchema,
 	usernameSchema,
 } from "./fields.schema";
 
 export const registerUserCodec = z
 	.object({
-		name: nameSchema,
+		firstname: firstnameSchema,
 		lastname: lastnameSchema,
 		username: usernameSchema,
 		email: emailSchema,

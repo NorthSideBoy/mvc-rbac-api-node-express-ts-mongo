@@ -1,18 +1,14 @@
 import { z } from "zod";
 import {
 	birthdaySchema,
-	emailSchema,
+	firstnameSchema,
 	lastnameSchema,
-	nameSchema,
-	usernameSchema,
 } from "./fields.schema";
 
-export const updateUserCodec = z
+export const updateUserProfileCodec = z
 	.object({
-		name: nameSchema.optional(),
+		firstname: firstnameSchema.optional(),
 		lastname: lastnameSchema.optional(),
-		username: usernameSchema.optional(),
-		email: emailSchema.optional(),
 		birthday: birthdaySchema.optional(),
 	})
 	.partial()

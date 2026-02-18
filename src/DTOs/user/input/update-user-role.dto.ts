@@ -1,3 +1,5 @@
-import type { User } from "../../../types/user.type";
+import type { UpdateRole } from "../../../rbac/role";
 
-export type UpdateUserRole = User.UpdateRole;
+export type UpdateUserRole = {
+	role: UpdateRole;
+};

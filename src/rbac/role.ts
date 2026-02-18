@@ -6,5 +6,5 @@ export enum Role {
 
 export enum UpdateRole {
 	MANAGER = "MANAGER",
-	USER = "USER"
+	USER = "USER",
 }
