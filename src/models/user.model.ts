@@ -7,19 +7,27 @@ import {
 	prop,
 	type ReturnModelType,
 } from "@typegoose/typegoose";
-import { type Base, TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
+import type { Base } from "@typegoose/typegoose/lib/defaultClasses";
 import type { BeAnObject } from "@typegoose/typegoose/lib/types";
 import type { Types } from "mongoose";
 import paginatePlugin from "mongoose-paginate-v2";
+import {
+	filterable,
+	type PaginateModel,
+	paginatedQueryPlugin,
+	sorteable,
+} from "../plugins/paginated-query.plugin";
 import { updatedAtPlugin } from "../plugins/updated-at.plugin";
 import { Role } from "../rbac/role";
 import type { User as UserTypes } from "../types/user.type";
 import { hasher } from "../utils/hasher.util";
+import { Search } from "../DTOs/operation/output/search.dto";
+
+type UserModelType = ReturnModelType<typeof User, BeAnObject> &
+	PaginateModel<User>;
 
 @modelOptions({
-	schemaOptions: {
-		versionKey: false,
-	},
+	schemaOptions: { versionKey: false },
 })
 @pre<User>("save", async function () {
 	const isHash = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
@@ -27,39 +35,59 @@ import { hasher } from "../utils/hasher.util";
 		this.password = await hasher.encrypt(this.password);
 })
 @plugin(paginatePlugin)
+@plugin(paginatedQueryPlugin, { createdAt: -1 })
 @plugin(updatedAtPlugin)
-export class User extends TimeStamps implements Base {
+export class User implements Base {
+	@prop({ type: () => String })
 	_id!: Types.ObjectId;
 
+	@prop({ type: () => String })
 	id!: string;
 
+	@filterable()
+	@sorteable()
 	@prop({ required: true, trim: true })
 	firstname: string;
-
+	@filterable()
+	@sorteable()
 	@prop({ required: true, trim: true })
 	lastname: string;
 
+	@filterable()
+	@sorteable()
 	@prop({ required: true, trim: true, unique: true })
 	username: string;
 
+	@filterable()
+	@sorteable()
 	@prop({ required: true, trim: true, unique: true })
 	email: string;
 
+	@filterable()
+	@sorteable()
 	@prop({ default: Role.USER })
 	role: Role;
 
 	@prop({ required: true, trim: true })
 	password: string;
 
+	@filterable({ range: true })
+	@sorteable()
 	@prop({ required: true })
 	birthday: Date;
 
+	@filterable()
+	@sorteable()
 	@prop({ default: false })
 	enable: boolean;
 
+	@filterable({ range: true })
+	@sorteable()
 	@prop({ default: new Date() })
 	createdAt: Date;
 
+	@filterable()
+	@sorteable()
 	@prop({ default: new Date() })
 	updatedAt: Date;
 
@@ -84,49 +112,60 @@ export class User extends TimeStamps implements Base {
 		return secure;
 	}
 
-	static async findByEmail(
-		this: ReturnModelType<typeof User, BeAnObject>,
-		email: string,
-	) {
-		// biome-ignore lint: Mongoose needs to type 'this'
-		return await this.findOne({ email });
-	}
-
-	static async findByUsername(
-		this: ReturnModelType<typeof User, BeAnObject>,
-		username: string,
-	) {
-		// biome-ignore lint: Mongoose needs to type 'this'
-		return await this.findOne({ username });
-	}
-
-	static async findOneByRole(
-		this: ReturnModelType<typeof User, BeAnObject>,
-		role: Role,
-	) {
-		// biome-ignore lint: Mongoose needs to type 'this'
-		const user = await this.findOne({ role });
-		return user;
-	}
-
-	static async updatePassword(
-		this: ReturnModelType<typeof User, BeAnObject>,
-		id: string,
-		password: string,
-	) {
-		const hash = await hasher.encrypt(password);
-		// biome-ignore lint: Mongoose needs to type 'this'
-		return await this.updateOne({ _id: id }, { password: hash });
-	}
-
 	public async comparePassword(
 		this: DocumentType<User, BeAnObject>,
 		plain: string,
 	): Promise<boolean> {
 		return await hasher.compare(plain, this.password);
 	}
+
+	static async findByEmail(this: UserModelType, email: string) {
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		return await this.findOne({ email });
+	}
+
+	static async findByUsername(this: UserModelType, username: string) {
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		return await this.findOne({ username });
+	}
+
+	static async findOneByRole(this: UserModelType, role: Role) {
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		return await this.findOne({ role });
+	}
+
+	static async updatePassword(
+		this: UserModelType,
+		id: string,
+		password: string,
+	) {
+		const hash = await hasher.encrypt(password);
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		return await this.updateOne({ _id: id }, { password: hash });
+	}
+
+	public static async search(
+		this: UserModelType,
+		input: UserTypes.Query,
+	): Promise<Search<User>> {
+		// biome-ignore lint: Need to keep 'this' context for plugin method
+		const filters = this.buildFilters(input);
+		// biome-ignore lint: Need to keep 'this' context for plugin methods
+
+		const options = this.getPaginationOptions(input);
+
+		// biome-ignore lint: paginate method from mongoose-paginate-v2
+		const result = await this.paginate(filters, {
+			page: options.page,
+			limit: options.limit,
+			sort: options.sort,
+		});
+
+		// biome-ignore lint: Need to keep 'this' context for plugin methods
+		return this.formatQuery(result, options.page, options.limit);
+	}
 }
 
-const UserModel = getModelForClass(User);
+const UserModel = getModelForClass(User) as unknown as UserModelType;
 
 export default UserModel;

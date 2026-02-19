@@ -1,5 +1,8 @@
 import type { Role } from "../../../rbac/role";
 import type { User as Types } from "../../../types/user.type";
+
+type UserType = Types.Secure;
+
 export class User {
 	id: string;
 	firstname: string;
@@ -13,4 +16,4 @@ export class User {
 	updatedAt: Date;
 }
 
-const _typeCheck: Types.Secure = {} as User;
+const _typeCheck: UserType = {} as User;

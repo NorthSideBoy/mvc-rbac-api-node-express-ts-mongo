@@ -7,7 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!src/routes", "!src/docs"]
+		"includes": [
+			"**",
+			"!src/routes",
+			"!src/docs",
+			"!src/plugins/paginated-query.plugin.ts"
+		]
 	},
 	"formatter": {
 		"enabled": true,

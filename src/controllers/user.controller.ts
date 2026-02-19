@@ -6,6 +6,7 @@ import {
 	Path,
 	Post,
 	Put,
+	Queries,
 	Request,
 	Response,
 	Route,
@@ -13,9 +14,11 @@ import {
 	SuccessResponse,
 	Tags,
 } from "tsoa";
+import type { Search } from "../DTOs/operation/output/search.dto";
 import type { Result } from "../DTOs/operation/output/result.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
 import type { LoginUser } from "../DTOs/user/input/login-user.dto";
+import type { QueryUsers } from "../DTOs/user/input/query-users.dto";
 import type { RegisterUser } from "../DTOs/user/input/register-user.dto";
 import type { UpdateUserEmail } from "../DTOs/user/input/update-user-email.dto";
 import type { UpdateUserPassword } from "../DTOs/user/input/update-user-password.dto";
@@ -65,6 +68,22 @@ export class UserController extends Controller {
 		@Request() _request: ExtendedRequest,
 	): Promise<AuthenticatedUser> {
 		return this.userService.login(body);
+	}
+
+	/**
+	 * @summary Search users
+	 */
+	@Get("/search")
+	@SuccessResponse(200)
+	@Response(401, "Unauthorized")
+	@Response(422, "UnprocessableEntity")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	async search(
+		@Queries() query: QueryUsers,
+		@Request() request: ExtendedRequest,
+	): Promise<Search<User>> {
+		return this.userService.search(query, request.access);
 	}
 
 	/**
@@ -135,7 +154,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Enable or disable user
+	 * @summary Enable or disable user by id
 	 */
 	@Put("/{id}/status")
 	@SuccessResponse(200)
@@ -154,7 +173,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Promote or demote user role
+	 * @summary Promote or demote user role by id
 	 */
 	@Put("/{id}/role")
 	@SuccessResponse(200)
@@ -173,7 +192,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Update user password
+	 * @summary Update user password by id
 	 */
 	@Put("/{id}/password")
 	@SuccessResponse(200)
@@ -192,7 +211,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Update user email
+	 * @summary Update user email by id
 	 */
 	@Put("/{id}/email")
 	@SuccessResponse(200)
@@ -212,7 +231,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * @summary Update user username
+	 * @summary Update user username by id
 	 */
 	@Put("/{id}/username")
 	@SuccessResponse(200)

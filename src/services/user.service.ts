@@ -1,6 +1,8 @@
+// services/user.service.ts
 import { result } from "../builders/result.builder";
 import { createUserCodec } from "../codecs/user/create-user.codec";
 import { loginUserCodec } from "../codecs/user/login-user.codec";
+import { searchUsersCodec } from "../codecs/user/query-users.codec";
 import { registerUserCodec } from "../codecs/user/register-user.codec";
 import { updateUserEmailCodec } from "../codecs/user/update-user-email.codec";
 import { updateUserPasswordCodec } from "../codecs/user/update-user-password.codec";
@@ -8,9 +10,11 @@ import { updateUserProfileCodec } from "../codecs/user/update-user-profile.codec
 import { updateUserRoleCodec } from "../codecs/user/update-user-role.codec";
 import { updateUserStatusCodec } from "../codecs/user/update-user-status.codec";
 import { updateUserUsernameCodec } from "../codecs/user/update-user-username.codec";
+import type { Search } from "../DTOs/operation/output/search.dto";
 import type { Result } from "../DTOs/operation/output/result.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
 import type { LoginUser } from "../DTOs/user/input/login-user.dto";
+import type { QueryUsers } from "../DTOs/user/input/query-users.dto";
 import type { RegisterUser } from "../DTOs/user/input/register-user.dto";
 import type { UpdateUserEmail } from "../DTOs/user/input/update-user-email.dto";
 import type { UpdateUserPassword } from "../DTOs/user/input/update-user-password.dto";
@@ -20,7 +24,6 @@ import type { UpdateUserStatus } from "../DTOs/user/input/update-user-status.dto
 import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username.dto";
 import type { AuthenticatedUser } from "../DTOs/user/output/authenticated-user.dto";
 import type { User as DTO } from "../DTOs/user/output/user.dto";
-import { PermissionDeniedError } from "../errors/authorization/permission-denied.error";
 import { AdminAlreadyExistsError } from "../errors/user/admin-already-exists.error";
 import { DuplicatePasswordError } from "../errors/user/duplicate-password.error";
 import { EmailInUseError } from "../errors/user/email-in-use.error";
@@ -30,7 +33,6 @@ import { UsernameInUseError } from "../errors/user/username-in-use.error";
 import { toAuthenticated } from "../mappers/user.mapper";
 import User from "../models/user.model";
 import { isAdminRole } from "../rbac/guard";
-import { PERMISSIONS, type Permission } from "../rbac/permissions";
 import { Role } from "../rbac/role";
 import RolePolicy from "../rbac/role-policy";
 import type { Token } from "../types/token.type";
@@ -46,12 +48,6 @@ export class UserService {
 		return user;
 	}
 
-	public async getByEmailOrThrow(email: string) {
-		const user = await User.findByEmail(email);
-		if (!user) throw new UserNotFoundError();
-		return user;
-	}
-
 	private async checkUserUniqueness(input: RegisterUser | CreateUser) {
 		const userByEmail = await User.findByEmail(input.email);
 		if (userByEmail) throw new EmailInUseError(input.email);
@@ -61,7 +57,7 @@ export class UserService {
 
 	async register(input: unknown): Promise<AuthenticatedUser> {
 		const decoded = decode<RegisterUser>(registerUserCodec, input);
-		this.checkUserUniqueness(decoded);
+		await this.checkUserUniqueness(decoded);
 		const created = await User.create(decoded);
 		const token = tokenizer.sign({
 			sub: created.id,
@@ -75,7 +71,6 @@ export class UserService {
 	async login(input: unknown): Promise<AuthenticatedUser> {
 		const decoded = decode<LoginUser>(loginUserCodec, input);
 		const user = await User.findByEmail(decoded.email);
-		console.log(user);
 		if (!user) throw new InvalidUserCredentialsError();
 		const isValid = await user.comparePassword(decoded.password);
 		if (!isValid) throw new InvalidUserCredentialsError();
@@ -99,9 +94,22 @@ export class UserService {
 		return users.map((user) => user.secure);
 	}
 
+	async search(
+		input: unknown,
+		actor: Token.Payload,
+	): Promise<Search<DTO>> {
+		const decoded = decode<QueryUsers>(searchUsersCodec, input);
+		const result = await User.search(decoded);
+		const docs = result.docs.map((user) => user.secure)
+		return {
+			docs,
+			pagination: result.pagination
+		};
+	}
+
 	async create(input: unknown, actor: Token.Payload): Promise<DTO> {
 		const decoded = decode<CreateUser>(createUserCodec, input);
-		this.checkUserUniqueness(decoded);
+		await this.checkUserUniqueness(decoded);
 		if (isAdminRole(decoded.role)) {
 			const admin = await User.findOneByRole(Role.ADMIN);
 			if (admin) throw new AdminAlreadyExistsError();
@@ -186,7 +194,7 @@ export class UserService {
 
 	async delete(id: string, actor: Token.Payload): Promise<Result> {
 		const operation = await User.deleteOne({ _id: id });
-		if (operation.deletedCount) throw new UserNotFoundError();
+		if (!operation.deletedCount) throw new UserNotFoundError();
 		return result(operation.deletedCount);
 	}
 }

@@ -1,6 +1,8 @@
 import type { Role } from "../../../rbac/role";
 import type { User } from "../../../types/user.type";
 
+type CreateUserType = User.Create;
+
 export class CreateUser {
 	firstname: string;
 	lastname: string;
@@ -12,4 +14,4 @@ export class CreateUser {
 	enable: boolean;
 }
 
-const _typeCheck: User.Create = {} as CreateUser;
+const _typeCheck: CreateUserType = {} as CreateUser;

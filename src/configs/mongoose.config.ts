@@ -5,7 +5,7 @@ import { env } from "./env.config";
 export const Database = {
 	async connect(): Promise<void> {
 		try {
-			await mongoose.connect(env.DB.URL, { writeConcern: { w: "majority" } });
+			await mongoose.connect(env.DB.URL);
 
 			logger.info(
 				{ host: env.DB.HOST, port: env.DB.PORT, db: env.DB.NAME },

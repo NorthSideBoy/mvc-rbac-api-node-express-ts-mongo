@@ -1,7 +1,7 @@
 import type { Role } from "../../../rbac/role";
 import type { User } from "../../../types/user.type";
 
-type Type = User.Secure & { token: string };
+type AuthenticatedUserType = User.Secure & { token: string };
 
 export class AuthenticatedUser {
 	id: string;
@@ -17,4 +17,4 @@ export class AuthenticatedUser {
 	token: string;
 }
 
-const _typeCheck: Type = {} as AuthenticatedUser;
+const _typeCheck: AuthenticatedUserType = {} as AuthenticatedUser;

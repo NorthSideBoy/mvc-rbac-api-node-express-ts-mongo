@@ -1,5 +1,9 @@
 import type { UpdateRole } from "../../../rbac/role";
 
-export type UpdateUserRole = {
+type UpdateUserRoleType = { role: UpdateRole };
+
+export class UpdateUserRole {
 	role: UpdateRole;
-};
+}
+
+const _typeCheck: UpdateUserRoleType = {} as UpdateUserRole;

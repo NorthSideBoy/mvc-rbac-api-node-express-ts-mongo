@@ -1,4 +1,5 @@
 import type { Role } from "../rbac/role";
+import type { Query as QueryType } from "./query.type";
 export namespace User {
 	export type Schema = {
 		id: string;
@@ -15,6 +16,11 @@ export namespace User {
 	};
 
 	export type Create = Omit<Schema, "id" | "createdAt" | "updatedAt">;
+
+	export type Query = Partial<Omit<User.Create, "birthday">> & {
+		birthdayFrom?: Date;
+		birthdayTo?: Date;
+	} & QueryType;
 
 	export type Secure = Omit<Schema, "password">;
 

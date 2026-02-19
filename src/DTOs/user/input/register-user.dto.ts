@@ -1,6 +1,6 @@
 import type { User } from "../../../types/user.type";
 
-type Type = Omit<User.Create, "role">;
+type RegisterUserType = Omit<User.Create, "role">;
 
 export class RegisterUser {
 	firstname: string;
@@ -12,4 +12,4 @@ export class RegisterUser {
 	enable: boolean;
 }
 
-const _typeCheck: Type = {} as RegisterUser;
+const _typeCheck: RegisterUserType = {} as RegisterUser;
