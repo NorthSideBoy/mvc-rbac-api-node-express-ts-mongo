@@ -1,4 +1,4 @@
 import type { Request } from "express";
-import type { Token } from "./token.type";
+import type { AccessGrant } from "../security/access-grant";
 
-export type ExtendedRequest = Request & { access: Token.Payload };
+export type ExtendedRequest = Request & { access?: AccessGrant };

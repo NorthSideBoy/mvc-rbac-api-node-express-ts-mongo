@@ -15,7 +15,6 @@ import type { Token } from "../types/token.type";
 class Tokenizer {
 	sign(payload: Token.Sign, options: SignOptions = {}): string {
 		const { expiresIn = env.JWT.EXPIRES_IN, ...rest } = options;
-
 		return sign(payload, env.JWT.SECRET, {
 			...(rest as SignOptions),
 			expiresIn: expiresIn as NonNullable<SignOptions["expiresIn"]>,

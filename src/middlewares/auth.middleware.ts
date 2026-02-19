@@ -1,18 +1,19 @@
+import { ExecutionContext } from "../context/execution-context";
 import { ApplicationError } from "../errors/application-error";
 import MethodNotAllowedError from "../errors/http/method-not-allowed.error";
 import UnauthorizedError from "../errors/http/unauthorized.error";
 import HttpError from "../errors/http.error";
 import type { Role } from "../rbac/role";
-import RolePolicy from "../rbac/role-policy";
+import { AccessClaims } from "../security/access-claims";
+import { AccessGrant } from "../security/access-grant";
 import type { ExtendedRequest } from "../types/extended-request.type";
-import type { Token } from "../types/token.type";
 import { tokenizer } from "../utils/tokenizer.util";
 
 export async function expressAuthentication(
 	request: ExtendedRequest,
 	securityName: string,
 	allowed: Role[],
-): Promise<Token.Payload> {
+): Promise<unknown> {
 	try {
 		switch (securityName) {
 			case "Bearer": {
@@ -37,15 +38,15 @@ async function handleBearerAuth(
 	authHeader: string,
 	request: ExtendedRequest,
 	allowed: Role[],
-): Promise<Token.Payload> {
+): Promise<unknown> {
 	const token = extractBearerToken(authHeader);
 	if (!token) throw new UnauthorizedError("Invalid Bearer token format");
-	const access = tokenizer.verify(token);
-	const policy = RolePolicy.create();
-	if (!policy.canAccess(access.role, allowed))
-		throw new UnauthorizedError("Insufficient permissions");
-	request.access = access;
-	return access;
+	const payload = tokenizer.verify(token);
+	const claims = AccessClaims.fromPayload(payload);
+	const grant = AccessGrant.issue(claims, allowed);
+	request.access = grant;
+	ExecutionContext.enterWithGrant(grant);
+	return grant.claims.raw;
 }
 
 function extractBearerToken(authHeader: string): string | null {

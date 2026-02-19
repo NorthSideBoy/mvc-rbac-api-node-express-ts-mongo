@@ -14,8 +14,9 @@ import {
 	SuccessResponse,
 	Tags,
 } from "tsoa";
-import type { Search } from "../DTOs/operation/output/search.dto";
+import { ExecutionContext } from "../context/execution-context";
 import type { Result } from "../DTOs/operation/output/result.dto";
+import type { Search } from "../DTOs/operation/output/search.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
 import type { LoginUser } from "../DTOs/user/input/login-user.dto";
 import type { QueryUsers } from "../DTOs/user/input/query-users.dto";
@@ -35,7 +36,11 @@ import type { ExtendedRequest } from "../types/extended-request.type";
 @Route("users")
 @Tags("Users")
 export class UserController extends Controller {
-	private readonly userService = new UserService();
+	private createContext(request: ExtendedRequest): ExecutionContext {
+		return request.access
+			? ExecutionContext.createFromGrant(request.access)
+			: ExecutionContext.createAnonymous();
+	}
 
 	/**
 	 * @summary Register user
@@ -48,9 +53,10 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	async register(
 		@Body() body: RegisterUser | unknown,
-		@Request() _request: ExtendedRequest,
+		@Request() request: ExtendedRequest,
 	): Promise<AuthenticatedUser> {
-		return this.userService.register(body);
+		const userService = new UserService(this.createContext(request));
+		return userService.register(body);
 	}
 
 	/**
@@ -65,9 +71,10 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	async login(
 		@Body() body: LoginUser | unknown,
-		@Request() _request: ExtendedRequest,
+		@Request() request: ExtendedRequest,
 	): Promise<AuthenticatedUser> {
-		return this.userService.login(body);
+		const userService = new UserService(this.createContext(request));
+		return userService.login(body);
 	}
 
 	/**
@@ -83,7 +90,8 @@ export class UserController extends Controller {
 		@Queries() query: QueryUsers,
 		@Request() request: ExtendedRequest,
 	): Promise<Search<User>> {
-		return this.userService.search(query, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.search(query);
 	}
 
 	/**
@@ -99,7 +107,8 @@ export class UserController extends Controller {
 		@Path() id: string,
 		@Request() request: ExtendedRequest,
 	): Promise<User | null> {
-		return this.userService.findById(id, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.findById(id);
 	}
 
 	/**
@@ -111,7 +120,8 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
 	async findAll(@Request() request: ExtendedRequest): Promise<User[]> {
-		return this.userService.findAll(request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.findAll();
 	}
 
 	/**
@@ -130,7 +140,8 @@ export class UserController extends Controller {
 		@Request() request: ExtendedRequest,
 	): Promise<User> {
 		this.setStatus(201);
-		return this.userService.create(body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.create(body);
 	}
 
 	/**
@@ -150,7 +161,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserProfile | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updateProfile(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updateProfile(id, body);
 	}
 
 	/**
@@ -169,7 +181,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserStatus | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updateStatus(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updateStatus(id, body);
 	}
 
 	/**
@@ -188,7 +201,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserRole | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updateRole(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updateRole(id, body);
 	}
 
 	/**
@@ -207,7 +221,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserPassword | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updatePassword(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updatePassword(id, body);
 	}
 
 	/**
@@ -227,7 +242,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserEmail | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updateEmail(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updateEmail(id, body);
 	}
 
 	/**
@@ -247,7 +263,8 @@ export class UserController extends Controller {
 		@Body() body: UpdateUserUsername | unknown,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.updateUsername(id, body, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.updateUsername(id, body);
 	}
 
 	/**
@@ -263,6 +280,7 @@ export class UserController extends Controller {
 		@Path() id: string,
 		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		return this.userService.delete(id, request.access);
+		const userService = new UserService(this.createContext(request));
+		return userService.delete(id);
 	}
 }

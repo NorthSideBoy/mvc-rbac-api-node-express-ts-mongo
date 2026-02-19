@@ -11,6 +11,7 @@ import type { Base } from "@typegoose/typegoose/lib/defaultClasses";
 import type { BeAnObject } from "@typegoose/typegoose/lib/types";
 import type { Types } from "mongoose";
 import paginatePlugin from "mongoose-paginate-v2";
+import type { Search } from "../DTOs/operation/output/search.dto";
 import {
 	filterable,
 	type PaginateModel,
@@ -21,7 +22,6 @@ import { updatedAtPlugin } from "../plugins/updated-at.plugin";
 import { Role } from "../rbac/role";
 import type { User as UserTypes } from "../types/user.type";
 import { hasher } from "../utils/hasher.util";
-import { Search } from "../DTOs/operation/output/search.dto";
 
 type UserModelType = ReturnModelType<typeof User, BeAnObject> &
 	PaginateModel<User>;
@@ -38,10 +38,7 @@ type UserModelType = ReturnModelType<typeof User, BeAnObject> &
 @plugin(paginatedQueryPlugin, { createdAt: -1 })
 @plugin(updatedAtPlugin)
 export class User implements Base {
-	@prop({ type: () => String })
 	_id!: Types.ObjectId;
-
-	@prop({ type: () => String })
 	id!: string;
 
 	@filterable()
@@ -150,8 +147,8 @@ export class User implements Base {
 	): Promise<Search<User>> {
 		// biome-ignore lint: Need to keep 'this' context for plugin method
 		const filters = this.buildFilters(input);
-		// biome-ignore lint: Need to keep 'this' context for plugin methods
 
+		// biome-ignore lint: Need to keep 'this' context for plugin methods
 		const options = this.getPaginationOptions(input);
 
 		// biome-ignore lint: paginate method from mongoose-paginate-v2

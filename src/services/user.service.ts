@@ -10,8 +10,9 @@ import { updateUserProfileCodec } from "../codecs/user/update-user-profile.codec
 import { updateUserRoleCodec } from "../codecs/user/update-user-role.codec";
 import { updateUserStatusCodec } from "../codecs/user/update-user-status.codec";
 import { updateUserUsernameCodec } from "../codecs/user/update-user-username.codec";
-import type { Search } from "../DTOs/operation/output/search.dto";
+import { ExecutionContext } from "../context/execution-context";
 import type { Result } from "../DTOs/operation/output/result.dto";
+import type { Search } from "../DTOs/operation/output/search.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
 import type { LoginUser } from "../DTOs/user/input/login-user.dto";
 import type { QueryUsers } from "../DTOs/user/input/query-users.dto";
@@ -34,13 +35,11 @@ import { toAuthenticated } from "../mappers/user.mapper";
 import User from "../models/user.model";
 import { isAdminRole } from "../rbac/guard";
 import { Role } from "../rbac/role";
-import RolePolicy from "../rbac/role-policy";
-import type { Token } from "../types/token.type";
 import { tokenizer } from "../utils/tokenizer.util";
 import { decode } from "../utils/validator.util";
 
 export class UserService {
-	private readonly policy = RolePolicy.create();
+	constructor(readonly ctx: ExecutionContext = ExecutionContext.current()) {}
 
 	private async getByIdOrThrow(id: string) {
 		const user = await User.findById(id);
@@ -83,31 +82,29 @@ export class UserService {
 		return toAuthenticated(user, token);
 	}
 
-	async findById(id: string, actor: Token.Payload): Promise<DTO | null> {
+	async findById(id: string): Promise<DTO | null> {
 		const user = await User.findById(id);
 		if (!user) return null;
 		return user.secure;
 	}
 
-	async findAll(actor: Token.Payload): Promise<DTO[]> {
+	async findAll(): Promise<DTO[]> {
 		const users = await User.find();
 		return users.map((user) => user.secure);
 	}
 
-	async search(
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Search<DTO>> {
+	async search(input: unknown): Promise<Search<DTO>> {
+		console.log(this.ctx.actor.role);
 		const decoded = decode<QueryUsers>(searchUsersCodec, input);
 		const result = await User.search(decoded);
-		const docs = result.docs.map((user) => user.secure)
+		const docs = result.docs.map((user) => user.secure);
 		return {
 			docs,
-			pagination: result.pagination
+			pagination: result.pagination,
 		};
 	}
 
-	async create(input: unknown, actor: Token.Payload): Promise<DTO> {
+	async create(input: unknown): Promise<DTO> {
 		const decoded = decode<CreateUser>(createUserCodec, input);
 		await this.checkUserUniqueness(decoded);
 		if (isAdminRole(decoded.role)) {
@@ -118,44 +115,28 @@ export class UserService {
 		return user.secure;
 	}
 
-	async updateProfile(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updateProfile(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserProfile>(updateUserProfileCodec, input);
 		const operation = await User.updateOne({ _id: id }, decoded);
 		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
-	async updateStatus(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updateStatus(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserStatus>(updateUserStatusCodec, input);
 		const operation = await User.updateOne({ _id: id }, decoded);
 		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
-	async updateRole(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updateRole(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserRole>(updateUserRoleCodec, input);
 		const operation = await User.updateOne({ _id: id }, decoded);
 		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
-	async updatePassword(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updatePassword(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserPassword>(updateUserPasswordCodec, input);
 		const user = await this.getByIdOrThrow(id);
 		const isSame = await user.comparePassword(decoded.password);
@@ -164,11 +145,7 @@ export class UserService {
 		return result(operation.modifiedCount);
 	}
 
-	async updateEmail(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updateEmail(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserEmail>(updateUserEmailCodec, input);
 		const userByEmail = await User.findByEmail(decoded.email);
 		if (userByEmail && userByEmail.id !== id)
@@ -178,11 +155,7 @@ export class UserService {
 		return result(operation.modifiedCount);
 	}
 
-	async updateUsername(
-		id: string,
-		input: unknown,
-		actor: Token.Payload,
-	): Promise<Result> {
+	async updateUsername(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserUsername>(updateUserUsernameCodec, input);
 		const userByUsername = await User.findByUsername(decoded.username);
 		if (userByUsername && userByUsername.id !== id)
@@ -192,7 +165,7 @@ export class UserService {
 		return result(operation.modifiedCount);
 	}
 
-	async delete(id: string, actor: Token.Payload): Promise<Result> {
+	async delete(id: string): Promise<Result> {
 		const operation = await User.deleteOne({ _id: id });
 		if (!operation.deletedCount) throw new UserNotFoundError();
 		return result(operation.deletedCount);
