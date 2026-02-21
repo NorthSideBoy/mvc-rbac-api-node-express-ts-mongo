@@ -1,4 +1,4 @@
-import type { Role } from "../rbac/role";
+import type { Role } from "../enums/role.enum";
 import type { Token } from "./token.type";
 export namespace Access {
 	export type Claims = {

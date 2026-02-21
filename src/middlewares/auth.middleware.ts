@@ -1,9 +1,9 @@
 import { ExecutionContext } from "../context/execution-context";
+import type { Role } from "../enums/role.enum";
 import { ApplicationError } from "../errors/application-error";
 import MethodNotAllowedError from "../errors/http/method-not-allowed.error";
 import UnauthorizedError from "../errors/http/unauthorized.error";
 import HttpError from "../errors/http.error";
-import type { Role } from "../rbac/role";
 import { AccessClaims } from "../security/access-claims";
 import { AccessGrant } from "../security/access-grant";
 import type { ExtendedRequest } from "../types/extended-request.type";

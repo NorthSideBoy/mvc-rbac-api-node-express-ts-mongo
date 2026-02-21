@@ -1,4 +1,3 @@
-// services/user.service.ts
 import { result } from "../builders/result.builder";
 import { createUserCodec } from "../codecs/user/create-user.codec";
 import { loginUserCodec } from "../codecs/user/login-user.codec";
@@ -25,16 +24,16 @@ import type { UpdateUserStatus } from "../DTOs/user/input/update-user-status.dto
 import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username.dto";
 import type { AuthenticatedUser } from "../DTOs/user/output/authenticated-user.dto";
 import type { User as DTO } from "../DTOs/user/output/user.dto";
-import { AdminAlreadyExistsError } from "../errors/user/admin-already-exists.error";
+import { PermissionDeniedError } from "../errors/authorization/permission-denied.error";
 import { DuplicatePasswordError } from "../errors/user/duplicate-password.error";
 import { EmailInUseError } from "../errors/user/email-in-use.error";
 import { InvalidUserCredentialsError } from "../errors/user/invalid-user-credentials.error";
 import { UserNotFoundError } from "../errors/user/user-not-found.error";
 import { UsernameInUseError } from "../errors/user/username-in-use.error";
+import { roleToRBACRole, updateRoleToRole } from "../mappers/role.mapper";
 import { toAuthenticated } from "../mappers/user.mapper";
 import User from "../models/user.model";
-import { isAdminRole } from "../rbac/guard";
-import { Role } from "../rbac/role";
+import { Actor } from "../rbac/actor";
 import { tokenizer } from "../utils/tokenizer.util";
 import { decode } from "../utils/validator.util";
 
@@ -48,14 +47,18 @@ export class UserService {
 	}
 
 	private async checkUserUniqueness(input: RegisterUser | CreateUser) {
-		const userByEmail = await User.findByEmail(input.email);
-		if (userByEmail) throw new EmailInUseError(input.email);
-		const userByUsername = await User.findByUsername(input.username);
-		if (userByUsername) throw new UsernameInUseError(input.username);
+		const [isEmailTaken, isUsernameTaken] = await Promise.all([
+			User.isEmailAvailable(input.email),
+			User.isUsernameAvailable(input.username),
+		]);
+
+		if (!isEmailTaken) throw new EmailInUseError(input.email);
+		if (!isUsernameTaken) throw new UsernameInUseError(input.username);
 	}
 
 	async register(input: unknown): Promise<AuthenticatedUser> {
 		const decoded = decode<RegisterUser>(registerUserCodec, input);
+		if (!this.ctx.actor.can("user:read")) throw new PermissionDeniedError();
 		await this.checkUserUniqueness(decoded);
 		const created = await User.create(decoded);
 		const token = tokenizer.sign({
@@ -69,6 +72,7 @@ export class UserService {
 
 	async login(input: unknown): Promise<AuthenticatedUser> {
 		const decoded = decode<LoginUser>(loginUserCodec, input);
+		if (!this.ctx.actor.can("user:read")) throw new PermissionDeniedError();
 		const user = await User.findByEmail(decoded.email);
 		if (!user) throw new InvalidUserCredentialsError();
 		const isValid = await user.comparePassword(decoded.password);
@@ -83,19 +87,21 @@ export class UserService {
 	}
 
 	async findById(id: string): Promise<DTO | null> {
+		if (!this.ctx.actor.can("user:read")) throw new PermissionDeniedError();
 		const user = await User.findById(id);
 		if (!user) return null;
 		return user.secure;
 	}
 
 	async findAll(): Promise<DTO[]> {
+		if (!this.ctx.actor.can("user:read")) throw new PermissionDeniedError();
 		const users = await User.find();
 		return users.map((user) => user.secure);
 	}
 
 	async search(input: unknown): Promise<Search<DTO>> {
-		console.log(this.ctx.actor.role);
 		const decoded = decode<QueryUsers>(searchUsersCodec, input);
+		if (!this.ctx.actor.can("user:read")) throw new PermissionDeniedError();
 		const result = await User.search(decoded);
 		const docs = result.docs.map((user) => user.secure);
 		return {
@@ -106,39 +112,50 @@ export class UserService {
 
 	async create(input: unknown): Promise<DTO> {
 		const decoded = decode<CreateUser>(createUserCodec, input);
+		if (!this.ctx.actor.canManage("user:create", Actor.dummy(decoded.role)))
+			throw new PermissionDeniedError();
+		if (!this.ctx.actor.canAssign(decoded.role))
+			throw new PermissionDeniedError();
 		await this.checkUserUniqueness(decoded);
-		if (isAdminRole(decoded.role)) {
-			const admin = await User.findOneByRole(Role.ADMIN);
-			if (admin) throw new AdminAlreadyExistsError();
-		}
 		const user = await User.create(decoded);
 		return user.secure;
 	}
 
 	async updateProfile(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserProfile>(updateUserProfileCodec, input);
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-profile", user))
+			throw new PermissionDeniedError();
 		const operation = await User.updateOne({ _id: id }, decoded);
-		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
 	async updateStatus(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserStatus>(updateUserStatusCodec, input);
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-status", user))
+			throw new PermissionDeniedError();
 		const operation = await User.updateOne({ _id: id }, decoded);
-		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
 	async updateRole(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserRole>(updateUserRoleCodec, input);
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-role", user))
+			throw new PermissionDeniedError();
+		const role = updateRoleToRole(decoded.role);
+		const RBACRole = roleToRBACRole(role);
+		if (!this.ctx.actor.canAssign(RBACRole)) throw new PermissionDeniedError();
 		const operation = await User.updateOne({ _id: id }, decoded);
-		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
 	async updatePassword(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserPassword>(updateUserPasswordCodec, input);
 		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-password", user))
+			throw new PermissionDeniedError();
 		const isSame = await user.comparePassword(decoded.password);
 		if (isSame) throw new DuplicatePasswordError();
 		const operation = await User.updatePassword(id, decoded.password);
@@ -147,27 +164,34 @@ export class UserService {
 
 	async updateEmail(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserEmail>(updateUserEmailCodec, input);
-		const userByEmail = await User.findByEmail(decoded.email);
-		if (userByEmail && userByEmail.id !== id)
-			throw new EmailInUseError(decoded.email);
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-email", user))
+			throw new PermissionDeniedError();
+		const isEmailAvailable = await User.isEmailAvailable(decoded.email, id);
+		if (!isEmailAvailable) throw new EmailInUseError(decoded.email);
 		const operation = await User.updateOne({ _id: id }, decoded);
-		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
 	async updateUsername(id: string, input: unknown): Promise<Result> {
 		const decoded = decode<UpdateUserUsername>(updateUserUsernameCodec, input);
-		const userByUsername = await User.findByUsername(decoded.username);
-		if (userByUsername && userByUsername.id !== id)
-			throw new UsernameInUseError(decoded.username);
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:update-username", user))
+			throw new PermissionDeniedError();
+		const isUsernameAvailable = await User.isUsernameAvailable(
+			decoded.username,
+			id,
+		);
+		if (!isUsernameAvailable) throw new UsernameInUseError(decoded.username);
 		const operation = await User.updateOne({ _id: id }, decoded);
-		if (!operation.matchedCount) throw new UserNotFoundError();
 		return result(operation.modifiedCount);
 	}
 
 	async delete(id: string): Promise<Result> {
+		const user = await this.getByIdOrThrow(id);
+		if (!this.ctx.actor.canManage("user:delete", user))
+			throw new PermissionDeniedError();
 		const operation = await User.deleteOne({ _id: id });
-		if (!operation.deletedCount) throw new UserNotFoundError();
 		return result(operation.deletedCount);
 	}
 }

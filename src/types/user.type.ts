@@ -1,5 +1,5 @@
-import type { Role } from "../rbac/role";
-import type { Query as QueryType } from "./query.type";
+import type { IQuery as QueryType } from "../contracts/query.contract";
+import type { Role } from "../enums/role.enum";
 export namespace User {
 	export type Schema = {
 		id: string;
@@ -17,7 +17,7 @@ export namespace User {
 
 	export type Create = Omit<Schema, "id" | "createdAt" | "updatedAt">;
 
-	export type Query = Partial<Omit<User.Create, "birthday">> & {
+	export type IQuery = Partial<Omit<User.Create, "birthday">> & {
 		birthdayFrom?: Date;
 		birthdayTo?: Date;
 	} & QueryType;

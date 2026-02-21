@@ -1,4 +1,4 @@
-import type { UpdateRole } from "../../../rbac/role";
+import type { UpdateRole } from "../../../enums/role.enum";
 
 type UpdateUserRoleType = { role: UpdateRole };
 

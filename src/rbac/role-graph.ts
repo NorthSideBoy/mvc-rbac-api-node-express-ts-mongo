@@ -1,154 +1,93 @@
+import type { IEdge } from "./contracts";
 import type { Permission } from "./permissions";
 import { Role } from "./role";
 import { ROLE_DEFINITIONS } from "./role-definitions";
 
-type RoleEdge = {
-	includes: Set<Role>;
-	permissions: Set<Permission>;
-};
-
 export default class RoleGraph {
-	private readonly graph: Map<Role, RoleEdge>;
+	private constructor(private readonly graph: Map<Role, IEdge>) {}
 
-	private constructor(graph: Map<Role, RoleEdge>) {
-		this.graph = graph;
-	}
+	static create(): RoleGraph {
+		const graph = new Map<Role, IEdge>();
 
-	public static create(): RoleGraph {
-		const graph = new Map<Role, RoleEdge>();
-
-		for (const definition of ROLE_DEFINITIONS) {
-			graph.set(definition.name, {
-				includes: new Set(definition.includes ?? []),
-				permissions: new Set(definition.permissions ?? []),
+		ROLE_DEFINITIONS.forEach(({ name, includes = [], permissions = [] }) => {
+			graph.set(name, {
+				includes: new Set(includes),
+				permissions: new Set(permissions as Permission[]),
 			});
-		}
+		});
 
-		for (const role of Object.values(Role)) {
+		Object.values(Role).forEach((role) => {
 			if (!graph.has(role)) {
 				graph.set(role, { includes: new Set(), permissions: new Set() });
 			}
-		}
+		});
 
 		return new RoleGraph(graph);
 	}
 
-	public getAllIncludedRoles(role: Role): Role[] {
-		return this.resolveRoles(role);
-	}
+	private resolveRoles(role: Role, visited = new Set<Role>()): Set<Role> {
+		if (visited.has(role)) return visited;
+		visited.add(role);
 
-	public includesRole(role: Role, target: Role): boolean {
-		const includedRoles = this.resolveRoles(role);
-		return includedRoles.includes(target);
-	}
-
-	public getParentRoles(role: Role): Role[] {
-		const parents: Role[] = [];
-
-		for (const [potentialParent, _edge] of this.graph.entries()) {
-			if (
-				potentialParent !== role &&
-				this.includesRole(potentialParent, role)
-			) {
-				parents.push(potentialParent);
-			}
-		}
-
-		return parents;
-	}
-
-	public getDirectParents(role: Role): Role[] {
-		const directParents: Role[] = [];
-
-		for (const [potentialParent, edge] of this.graph.entries()) {
-			if (edge.includes.has(role)) {
-				directParents.push(potentialParent);
-			}
-		}
-
-		return directParents;
-	}
-
-	public getDirectChildren(role: Role): Role[] {
 		const edge = this.graph.get(role);
-		return edge ? Array.from(edge.includes) : [];
-	}
+		edge?.includes.forEach((included) => {
+			this.resolveRoles(included, visited);
+		});
 
-	public getAllRoles(): Role[] {
-		return Array.from(this.graph.keys());
-	}
-
-	public hasRole(role: Role): boolean {
-		return this.graph.has(role);
-	}
-
-	public hasPermission(role: Role, permission: Permission): boolean {
-		return this.resolvePermissions(role).has(permission);
-	}
-
-	public getAllPermissions(role: Role): Permission[] {
-		return Array.from(this.resolvePermissions(role));
-	}
-
-	private resolveRoles(role: Role): Role[] {
-		const visited = new Set<Role>();
-		const stack = [role];
-
-		while (stack.length > 0) {
-			const current = stack.pop();
-			if (!current || visited.has(current)) continue;
-
-			visited.add(current);
-			const edge = this.graph.get(current);
-
-			if (edge) {
-				for (const included of edge.includes) {
-					if (!visited.has(included)) {
-						stack.push(included);
-					}
-				}
-			}
-		}
-
-		return Array.from(visited);
+		return visited;
 	}
 
 	private resolvePermissions(role: Role): Set<Permission> {
-		const resolved = new Set<Permission>();
-		const visited = new Set<Role>();
-		const stack = [role];
+		const roles = this.resolveRoles(role);
+		const permissions = new Set<Permission>();
 
-		while (stack.length > 0) {
-			const current = stack.pop();
-			if (!current || visited.has(current)) continue;
+		roles.forEach((r) => {
+			this.graph.get(r)?.permissions.forEach((p) => {
+				permissions.add(p);
+			});
+		});
 
-			visited.add(current);
-			const edge = this.graph.get(current);
-			if (!edge) continue;
-
-			for (const permission of edge.permissions) {
-				resolved.add(permission);
-			}
-
-			for (const included of edge.includes) {
-				if (!visited.has(included)) {
-					stack.push(included);
-				}
-			}
-		}
-
-		return resolved;
+		return permissions;
 	}
 
-	public getDepth(role: Role): number {
+	getAllRoles = (): Role[] => Array.from(this.graph.keys());
+
+	hasRole = (role: Role): boolean => this.graph.has(role);
+
+	getDirectChildren = (role: Role): Role[] =>
+		Array.from(this.graph.get(role)?.includes ?? []);
+
+	getDirectParents = (role: Role): Role[] =>
+		Array.from(this.graph.entries())
+			.filter(([_, edge]) => edge.includes.has(role))
+			.map(([parent]) => parent);
+
+	includesRole = (role: Role, target: Role): boolean =>
+		this.resolveRoles(role).has(target);
+
+	getAllIncludedRoles = (role: Role): Role[] =>
+		Array.from(this.resolveRoles(role));
+
+	getParentRoles = (role: Role): Role[] =>
+		Array.from(this.graph.keys()).filter(
+			(p) => p !== role && this.includesRole(p, role),
+		);
+
+	hasPermission = (role: Role, permission: Permission): boolean =>
+		this.resolvePermissions(role).has(permission);
+
+	getAllPermissions = (role: Role): Permission[] =>
+		Array.from(this.resolvePermissions(role));
+
+	getDepth(role: Role, memo = new Map<Role, number>()): number {
+		const cached = memo.get(role);
+		if (cached !== undefined) return cached;
+
 		const parents = this.getParentRoles(role);
 		if (parents.length === 0) return 0;
 
-		let maxDepth = 0;
-		for (const parent of parents) {
-			maxDepth = Math.max(maxDepth, this.getDepth(parent) + 1);
-		}
-
-		return maxDepth;
+		const depth = 1 + Math.max(...parents.map((p) => this.getDepth(p, memo)));
+		memo.set(role, depth);
+		return depth;
 	}
 }

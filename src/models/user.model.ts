@@ -9,9 +9,11 @@ import {
 } from "@typegoose/typegoose";
 import type { Base } from "@typegoose/typegoose/lib/defaultClasses";
 import type { BeAnObject } from "@typegoose/typegoose/lib/types";
+import { type Filter, ObjectId } from "mongodb";
 import type { Types } from "mongoose";
 import paginatePlugin from "mongoose-paginate-v2";
 import type { Search } from "../DTOs/operation/output/search.dto";
+import { Role } from "../enums/role.enum";
 import {
 	filterable,
 	type PaginateModel,
@@ -19,7 +21,6 @@ import {
 	sorteable,
 } from "../plugins/paginated-query.plugin";
 import { updatedAtPlugin } from "../plugins/updated-at.plugin";
-import { Role } from "../rbac/role";
 import type { User as UserTypes } from "../types/user.type";
 import { hasher } from "../utils/hasher.util";
 
@@ -45,6 +46,7 @@ export class User implements Base {
 	@sorteable()
 	@prop({ required: true, trim: true })
 	firstname: string;
+
 	@filterable()
 	@sorteable()
 	@prop({ required: true, trim: true })
@@ -131,19 +133,9 @@ export class User implements Base {
 		return await this.findOne({ role });
 	}
 
-	static async updatePassword(
-		this: UserModelType,
-		id: string,
-		password: string,
-	) {
-		const hash = await hasher.encrypt(password);
-		// biome-ignore lint: Mongoose return type handled by Typegoose
-		return await this.updateOne({ _id: id }, { password: hash });
-	}
-
 	public static async search(
 		this: UserModelType,
-		input: UserTypes.Query,
+		input: UserTypes.IQuery,
 	): Promise<Search<User>> {
 		// biome-ignore lint: Need to keep 'this' context for plugin method
 		const filters = this.buildFilters(input);
@@ -160,6 +152,40 @@ export class User implements Base {
 
 		// biome-ignore lint: Need to keep 'this' context for plugin methods
 		return this.formatQuery(result, options.page, options.limit);
+	}
+
+	static async updatePassword(
+		this: UserModelType,
+		id: string,
+		password: string,
+	) {
+		const hash = await hasher.encrypt(password);
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		return await this.updateOne({ _id: id }, { password: hash });
+	}
+
+	static async isUsernameAvailable(
+		this: UserModelType,
+		username: string,
+		id?: string,
+	): Promise<boolean> {
+		const query: Filter<User> = { username };
+		if (id) query._id = { $ne: ObjectId.createFromHexString(id) };
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		const exists = await this.exists(query);
+		return exists === null;
+	}
+
+	static async isEmailAvailable(
+		this: UserModelType,
+		email: string,
+		id?: string,
+	): Promise<boolean> {
+		const query: Filter<User> = { email };
+		if (id) query._id = { $ne: ObjectId.createFromHexString(id) };
+		// biome-ignore lint: Mongoose return type handled by Typegoose
+		const exists = await this.exists(query);
+		return exists === null;
 	}
 }
 

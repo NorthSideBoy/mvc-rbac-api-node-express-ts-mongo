@@ -29,7 +29,7 @@ import type { UpdateUserStatus } from "../DTOs/user/input/update-user-status.dto
 import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username.dto";
 import type { AuthenticatedUser } from "../DTOs/user/output/authenticated-user.dto";
 import type { User } from "../DTOs/user/output/user.dto";
-import { Role } from "../rbac/role";
+import { Role } from "../enums/role.enum";
 import { UserService } from "../services/user.service";
 import type { ExtendedRequest } from "../types/extended-request.type";
 

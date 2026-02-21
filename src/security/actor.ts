@@ -1,19 +1,9 @@
-import type { Role } from "../rbac/role";
+import { type IActor, Kind } from "../contracts/actor.contract";
+import { Actor as RBACActor } from "../rbac/actor";
+import { Role } from "../rbac/role";
 import type { AccessClaims } from "./access-claims";
-import { kind } from "./kind";
-
-export interface Actor {
-	readonly kind: kind;
-	readonly id: string;
-	readonly username: string;
-	readonly role?: Role;
-	readonly enable: boolean;
-	readonly issuedAt?: number;
-	readonly expiresAt?: number;
-}
-
-export class UserActor implements Actor {
-	readonly kind = kind.USER;
+export class UserActor extends RBACActor implements IActor {
+	readonly kind = Kind.USER;
 
 	private constructor(
 		public readonly id: string,
@@ -22,7 +12,9 @@ export class UserActor implements Actor {
 		public readonly enable: boolean,
 		public readonly issuedAt: number,
 		public readonly expiresAt: number,
-	) {}
+	) {
+		super(id, role);
+	}
 
 	static fromClaims(claims: AccessClaims): UserActor {
 		return new UserActor(
@@ -34,37 +26,41 @@ export class UserActor implements Actor {
 			claims.expiresAt,
 		);
 	}
-}
 
-export class AnonymousActor implements Actor {
-	readonly kind = kind.ANONYMOUS;
-	readonly id = process.pid.toString();
-	readonly username = "anonymous";
-	readonly enable = true;
-
-	private static INSTANCE: AnonymousActor;
-
-	private constructor() {}
-
-	static instance(): AnonymousActor {
-		if (!AnonymousActor.INSTANCE)
-			AnonymousActor.INSTANCE = new AnonymousActor();
-		return AnonymousActor.INSTANCE;
+	isActive(): boolean {
+		const now = Date.now();
+		return this.enable && now >= this.issuedAt && now <= this.expiresAt;
 	}
 }
 
-export class SystemActor implements Actor {
-	readonly kind = kind.SYSTEM;
-	readonly id = process.pid.toString();
+export class AnonymousActor extends RBACActor implements IActor {
+	readonly kind = Kind.ANONYMOUS;
+	readonly username = "anonymous";
+	readonly enable = true;
+	readonly sessionId: string;
+
+	constructor(sessionId?: string) {
+		const id = sessionId || crypto.randomUUID();
+		super(id, Role.ANONYMOUS);
+		this.sessionId = id;
+	}
+}
+
+export class SystemActor extends RBACActor implements IActor {
+	readonly kind = Kind.SYSTEM;
 	readonly username = "system";
 	readonly enable = true;
 
-	private static INSTANCE: SystemActor;
+	private static instance: SystemActor;
 
-	private constructor() {}
+	private constructor() {
+		const id = process.pid.toString();
+		super(id, Role.JOKER);
+	}
 
-	static instance(): SystemActor {
-		if (!SystemActor.INSTANCE) SystemActor.INSTANCE = new SystemActor();
-		return SystemActor.INSTANCE;
+	static getInstance(): SystemActor {
+		if (!SystemActor.instance) SystemActor.instance = new SystemActor();
+
+		return SystemActor.instance;
 	}
 }

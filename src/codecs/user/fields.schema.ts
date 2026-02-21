@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Role, UpdateRole } from "../../rbac/role";
+import { Role, UpdateRole } from "../../enums/role.enum";
 
 export const firstnameSchema = z
 	.string()

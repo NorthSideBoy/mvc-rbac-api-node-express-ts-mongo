@@ -1,18 +1,19 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { IActor } from "../contracts/actor.contract";
 import type { AccessGrant } from "../security/access-grant";
-import { type Actor, AnonymousActor } from "../security/actor";
+import { AnonymousActor } from "../security/actor";
 
 const storage = new AsyncLocalStorage<ExecutionContext>();
 
 export class ExecutionContext {
-	private constructor(readonly actor: Actor) {}
+	private constructor(readonly actor: IActor) {}
 
 	static createFromGrant(grant: AccessGrant): ExecutionContext {
-		return new ExecutionContext(grant.toActor());
+		return new ExecutionContext(grant.actor);
 	}
 
 	static createAnonymous(): ExecutionContext {
-		return new ExecutionContext(AnonymousActor.instance());
+		return new ExecutionContext(new AnonymousActor());
 	}
 
 	static current(): ExecutionContext {

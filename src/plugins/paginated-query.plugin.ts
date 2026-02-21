@@ -177,7 +177,7 @@ export interface PaginationOptions {
 	sort?: string;
 }
 
-export interface Query<T> {
+export interface IQuery<T> {
 	docs: T[];
 	pagination: {
 		total: number;
@@ -193,7 +193,7 @@ export interface PaginateModel<T> extends Model<T> {
 	paginate: (
 		query?: any,
 		options?: { page?: number; limit?: number; sort?: Record<string, 1 | -1> },
-	) => Promise<Query<T>>;
+	) => Promise<IQuery<T>>;
 	buildFilters(input: Record<string, any>): Record<string, any>;
 	getPaginationOptions(options?: PaginationOptions): {
 		page: number;
@@ -204,7 +204,7 @@ export interface PaginateModel<T> extends Model<T> {
 		result: any,
 		page: number,
 		limit: number,
-	): Query<T>;
+	): IQuery<T>;
 }
 
 export class QueryBuilder {
@@ -371,7 +371,7 @@ export class QueryBuilder {
 		result: any,
 		page: number,
 		limit: number,
-	): Query<T> {
+	): IQuery<T> {
 		return {
 			docs: result.docs as T[],
 			pagination: {

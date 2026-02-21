@@ -1,4 +1,4 @@
-import type { Role } from "../../../rbac/role";
+import type { Role } from "../../../enums/role.enum";
 import type { User as Types } from "../../../types/user.type";
 
 type UserType = Types.Secure;

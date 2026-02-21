@@ -41,7 +41,6 @@ export const errorMiddleware: ErrorRequestHandler = (
 			[ApplicationErrorCode.EmailInUse]: 409,
 			[ApplicationErrorCode.InvalidCredentials]: 401,
 			[ApplicationErrorCode.PermissionDenied]: 403,
-			[ApplicationErrorCode.AdminAlreadyExists]: 409,
 			[ApplicationErrorCode.TokenExpired]: 401,
 			[ApplicationErrorCode.TokenTampered]: 401,
 			[ApplicationErrorCode.TokenBefore]: 401,

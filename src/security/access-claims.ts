@@ -1,6 +1,7 @@
-import type { Role } from "../rbac/role";
+import type { Role } from "../enums/role.enum";
 import type { Access } from "../types/access.type";
 import type { Token } from "../types/token.type";
+import { UserActor } from "./actor";
 
 export class AccessClaims {
 	private constructor(private readonly params: Access.Claims) {}
@@ -31,6 +32,10 @@ export class AccessClaims {
 
 	get raw(): Token.Payload {
 		return this.params.raw;
+	}
+
+	get actor(): UserActor {
+		return UserActor.fromClaims(this);
 	}
 
 	static fromPayload(payload: Token.Payload): AccessClaims {

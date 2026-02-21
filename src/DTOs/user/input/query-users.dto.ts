@@ -1,7 +1,7 @@
-import type { Role } from "../../../rbac/role";
+import type { Role } from "../../../enums/role.enum";
 import type { User } from "../../../types/user.type";
 
-type QueryUsersType = User.Query;
+type QueryUsersType = User.IQuery;
 
 export class QueryUsers {
 	page?: number;
