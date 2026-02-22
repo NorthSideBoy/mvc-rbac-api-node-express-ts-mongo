@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:6.0
+    image: mongo:8.0
     container_name: mongodb
     restart: unless-stopped
     env_file:
@@ -11,18 +11,30 @@ services:
       - MONGO_INITDB_DATABASE=${DB_NAME}
     volumes:
       - ./docker/mongo-entrypoint.sh:/mongo-entrypoint.sh:ro
-    entrypoint: ["/mongo-entrypoint.sh"]
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    entrypoint: [ "/mongo-entrypoint.sh" ]
     ports:
       - "${DB_PORT}:${DB_PORT}"
+    healthcheck:
+      test: [ "CMD", "mongosh", "--host", "localhost", "--port", "${DB_PORT}", "-u", "${DB_USER}", "-p", "${DB_PASSWORD}", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   mongo-init-rs:
-    image: mongo:6.0
+    image: mongo:8.0
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     env_file:
       - .env
     volumes:
       - ./docker/rs-init.sh:/rs-init.sh:ro
-    entrypoint: ["/bin/bash", "/rs-init.sh"]
+    entrypoint: [ "/bin/bash", "/rs-init.sh" ]
     restart: "no"
- 
+
+volumes:
+  mongodb_data:
+  mongodb_config:
