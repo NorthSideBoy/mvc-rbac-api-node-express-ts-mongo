@@ -10,7 +10,7 @@ import { updateUserRoleCodec } from "../codecs/user/update-user-role.codec";
 import { updateUserStatusCodec } from "../codecs/user/update-user-status.codec";
 import { updateUserUsernameCodec } from "../codecs/user/update-user-username.codec";
 import { context } from "../context/context.handler";
-import type { ExecutionContext } from "../context/execution-context";
+import type ExecutionContext from "../context/execution-context";
 import type { Result } from "../DTOs/operation/output/result.dto";
 import type { Search } from "../DTOs/operation/output/search.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
@@ -74,7 +74,6 @@ export default class UserService {
 	}
 
 	async login(input: unknown): Promise<AuthenticatedUser> {
-		console.log(this.ctx.actor);
 		const decoded = decode<LoginUser>(loginUserCodec, input);
 		if (!this.ctx.actor.can(OPERATIONS.USER_READ))
 			throw new PermissionDeniedError();
@@ -107,7 +106,6 @@ export default class UserService {
 	}
 
 	async search(input: unknown): Promise<Search<DTO>> {
-		console.log(this.ctx.actor);
 		const decoded = decode<QueryUsers>(searchUsersCodec, input);
 		if (!this.ctx.actor.can(OPERATIONS.USER_READ))
 			throw new PermissionDeniedError();

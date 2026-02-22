@@ -2,7 +2,7 @@ import type { IActor } from "../contracts/actor.contract";
 import type { AccessGrant } from "../security/access-grant";
 import { AnonymousActor, SystemActor } from "../security/actor";
 
-export class ExecutionContext {
+export default class ExecutionContext {
 	private constructor(readonly actor: IActor) {}
 
 	static fromGrant(grant: AccessGrant): ExecutionContext {

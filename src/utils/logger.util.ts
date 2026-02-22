@@ -59,6 +59,15 @@ export class Logger {
 		return this.base.child(bindings, options);
 	}
 
+	// NUEVOS MÉTODOS PARA CONTROL DE NIVEL
+	setLevel(level: string) {
+		this.base.level = level;
+	}
+
+	getLevel(): string {
+		return this.base.level;
+	}
+
 	get raw(): PinoLogger {
 		return this.base;
 	}

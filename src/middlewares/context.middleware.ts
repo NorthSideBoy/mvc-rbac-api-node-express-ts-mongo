@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
-import { ExecutionContext } from "../context/execution-context";
-import type { ExtendedRequest } from "../types/extended-request.type";
 import { context } from "../context/context.handler";
+import ExecutionContext from "../context/execution-context";
+import type { ExtendedRequest } from "../types/extended-request.type";
 
 export const contextMiddleware: RequestHandler = (
 	request: ExtendedRequest,
@@ -12,7 +12,7 @@ export const contextMiddleware: RequestHandler = (
 		? ExecutionContext.fromGrant(request.access)
 		: ExecutionContext.anonymous();
 
-	request.context = ctx
+	request.context = ctx;
 	context.run(ctx, () => {
 		next();
 	});

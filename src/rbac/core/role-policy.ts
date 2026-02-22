@@ -106,8 +106,9 @@ export default class RolePolicy {
 
 	canAssign(assignerRole: Role, targetRole: Role): boolean {
 		return (
-			assignerRole !== targetRole &&
-			this.graph.includesRole(assignerRole, targetRole)
+			this.graph.hasPermission(assignerRole, PERMISSIONS.WILDCARD) ||
+			(assignerRole !== targetRole &&
+				this.graph.includesRole(assignerRole, targetRole))
 		);
 	}
 

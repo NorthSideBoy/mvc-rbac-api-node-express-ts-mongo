@@ -59,16 +59,24 @@ export const birthdaySchema = z
 		z.string().refine(
 			(val) => {
 				const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
-				return isoRegex.test(val);
+				const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+				return isoRegex.test(val) || dateRegex.test(val);
 			},
 			{
 				message:
-					"Invalid ISO 8601 string format. Expected: YYYY-MM-DDTHH:mm:ss.sssZ",
+					"Invalid format. Expected: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ",
 			},
 		),
 		z.date(),
 	])
-	.transform((val) => (typeof val === "string" ? new Date(val) : val));
+	.transform((val) => {
+		if (typeof val === "string") {
+			if (/^\d{4}-\d{2}-\d{2}$/.test(val))
+				return new Date(`${val}T00:00:00.000Z`);
+			return new Date(val);
+		}
+		return val;
+	});
 
 export const enableSchema = z.boolean().default(true);
 
