@@ -48,5 +48,7 @@
 		"moduleDetection": "force",
 		"skipLibCheck": true,
 		"resolveJsonModule": true
-	}
+	},
+	"include": ["src"],
+	"exclude": ["dist", "node_modules", "scripts"]
 }

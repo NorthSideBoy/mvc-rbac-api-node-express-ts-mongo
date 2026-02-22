@@ -1,4 +1,3 @@
-import { ExecutionContext } from "../context/execution-context";
 import type { Role } from "../enums/role.enum";
 import { ApplicationError } from "../errors/core/application-error";
 import HttpError from "../errors/core/http.error";
@@ -45,7 +44,6 @@ async function handleBearerAuth(
 	const claims = AccessClaims.fromPayload(payload);
 	const grant = AccessGrant.issue(claims, allowed);
 	request.access = grant;
-	ExecutionContext.enterWithGrant(grant);
 	return grant.claims.raw;
 }
 

@@ -10,7 +10,7 @@ import {
 } from "../codecs/user/fields.schema";
 import type { User } from "../types/user.type";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const toNumber = () =>
 	z

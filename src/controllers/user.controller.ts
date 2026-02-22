@@ -3,18 +3,17 @@ import {
 	Controller,
 	Delete,
 	Get,
+	Middlewares,
 	Path,
 	Post,
 	Put,
 	Queries,
-	Request,
 	Response,
 	Route,
 	Security,
 	SuccessResponse,
 	Tags,
 } from "tsoa";
-import { ExecutionContext } from "../context/execution-context";
 import type { Result } from "../DTOs/operation/output/result.dto";
 import type { Search } from "../DTOs/operation/output/search.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
@@ -30,18 +29,13 @@ import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username
 import type { AuthenticatedUser } from "../DTOs/user/output/authenticated-user.dto";
 import type { User } from "../DTOs/user/output/user.dto";
 import { Role } from "../enums/role.enum";
-import { UserService } from "../services/user.service";
-import type { ExtendedRequest } from "../types/extended-request.type";
+import { contextMiddleware } from "../middlewares/context.middleware";
+import UserService from "../services/user.service";
 
 @Route("users")
 @Tags("Users")
 export class UserController extends Controller {
-	private createContext(request: ExtendedRequest): ExecutionContext {
-		return request.access
-			? ExecutionContext.createFromGrant(request.access)
-			: ExecutionContext.createAnonymous();
-	}
-
+	private readonly userService = new UserService();
 	/**
 	 * @summary Register user
 	 */
@@ -53,10 +47,8 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	async register(
 		@Body() body: RegisterUser | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<AuthenticatedUser> {
-		const userService = new UserService(this.createContext(request));
-		return userService.register(body);
+		return this.userService.register(body);
 	}
 
 	/**
@@ -69,12 +61,8 @@ export class UserController extends Controller {
 	@Response(404, "NotFound")
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
-	async login(
-		@Body() body: LoginUser | unknown,
-		@Request() request: ExtendedRequest,
-	): Promise<AuthenticatedUser> {
-		const userService = new UserService(this.createContext(request));
-		return userService.login(body);
+	async login(@Body() body: LoginUser | unknown): Promise<AuthenticatedUser> {
+		return this.userService.login(body);
 	}
 
 	/**
@@ -86,12 +74,9 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
-	async search(
-		@Queries() query: QueryUsers,
-		@Request() request: ExtendedRequest,
-	): Promise<Search<User>> {
-		const userService = new UserService(this.createContext(request));
-		return userService.search(query);
+	@Middlewares([contextMiddleware])
+	async search(@Queries() query: QueryUsers): Promise<Search<User>> {
+		return this.userService.search(query);
 	}
 
 	/**
@@ -102,12 +87,9 @@ export class UserController extends Controller {
 	@Response(401, "Unauthorized")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
-	async findById(
-		@Path() id: string,
-		@Request() request: ExtendedRequest,
-	): Promise<User | null> {
-		const userService = new UserService(this.createContext(request));
-		return userService.findById(id);
+	@Middlewares([contextMiddleware])
+	async findById(@Path() id: string): Promise<User | null> {
+		return this.userService.findById(id);
 	}
 
 	/**
@@ -118,9 +100,9 @@ export class UserController extends Controller {
 	@Response(401, "Unauthorized")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
-	async findAll(@Request() request: ExtendedRequest): Promise<User[]> {
-		const userService = new UserService(this.createContext(request));
-		return userService.findAll();
+	@Middlewares([contextMiddleware])
+	async findAll(): Promise<User[]> {
+		return this.userService.findAll();
 	}
 
 	/**
@@ -134,13 +116,10 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.MANAGER])
-	async create(
-		@Body() body: CreateUser | unknown,
-		@Request() request: ExtendedRequest,
-	): Promise<User> {
+	@Middlewares([contextMiddleware])
+	async create(@Body() body: CreateUser | unknown): Promise<User> {
 		this.setStatus(201);
-		const userService = new UserService(this.createContext(request));
-		return userService.create(body);
+		return this.userService.create(body);
 	}
 
 	/**
@@ -155,13 +134,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
 	async update(
 		@Path() id: string,
 		@Body() body: UpdateUserProfile | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updateProfile(id, body);
+		return this.userService.updateProfile(id, body);
 	}
 
 	/**
@@ -175,13 +153,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.MANAGER])
+	@Middlewares([contextMiddleware])
 	async updateStatus(
 		@Path() id: string,
 		@Body() body: UpdateUserStatus | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updateStatus(id, body);
+		return this.userService.updateStatus(id, body);
 	}
 
 	/**
@@ -195,13 +172,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.ADMIN])
+	@Middlewares([contextMiddleware])
 	async updateRole(
 		@Path() id: string,
 		@Body() body: UpdateUserRole | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updateRole(id, body);
+		return this.userService.updateRole(id, body);
 	}
 
 	/**
@@ -215,13 +191,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
 	async updatePassword(
 		@Path() id: string,
 		@Body() body: UpdateUserPassword | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updatePassword(id, body);
+		return this.userService.updatePassword(id, body);
 	}
 
 	/**
@@ -236,13 +211,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
 	async updateEmail(
 		@Path() id: string,
 		@Body() body: UpdateUserEmail | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updateEmail(id, body);
+		return this.userService.updateEmail(id, body);
 	}
 
 	/**
@@ -257,13 +231,12 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
 	async updateUsername(
 		@Path() id: string,
 		@Body() body: UpdateUserUsername | unknown,
-		@Request() request: ExtendedRequest,
 	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.updateUsername(id, body);
+		return this.userService.updateUsername(id, body);
 	}
 
 	/**
@@ -275,11 +248,8 @@ export class UserController extends Controller {
 	@Response(404, "NotFound")
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.ADMIN])
-	async delete(
-		@Path() id: string,
-		@Request() request: ExtendedRequest,
-	): Promise<Result> {
-		const userService = new UserService(this.createContext(request));
-		return userService.delete(id);
+	@Middlewares([contextMiddleware])
+	async delete(@Path() id: string): Promise<Result> {
+		return this.userService.delete(id);
 	}
 }

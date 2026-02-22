@@ -13,9 +13,9 @@ import { logger } from "./utils/logger.util";
 const app = express();
 
 app.use(
-	pinoHttp({
-		logger: logger.raw,
-	}),
+	env.NODE_ENV === "production"
+		? pinoHttp({ logger: logger.raw, level: env.LOG_LEVEL })
+		: (_req, _res, next) => next(),
 );
 app.use(cors());
 app.use(express.json());

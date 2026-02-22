@@ -53,7 +53,7 @@ export class SystemActor extends RBACActor implements IActor {
 
 	private static instance: SystemActor;
 
-	private constructor() {
+	constructor() {
 		const id = process.pid.toString();
 		super(id, Role.JOKER);
 	}
