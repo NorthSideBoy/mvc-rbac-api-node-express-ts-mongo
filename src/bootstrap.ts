@@ -3,7 +3,10 @@ import { Database } from "./configs/mongoose.config";
 import { logger } from "./utils/logger.util";
 
 export const bootstrap = async (): Promise<void> => {
-	logger.info({ mode: env.NODE_ENV }, "[APP] starting");
+	logger.info(
+		{ mode: env.NODE_ENV, log_level: env.LOG_LEVEL },
+		"[APP] starting",
+	);
 	await Database.connect();
 };
 
