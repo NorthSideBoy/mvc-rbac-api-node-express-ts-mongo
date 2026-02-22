@@ -59,7 +59,6 @@ export class Logger {
 		return this.base.child(bindings, options);
 	}
 
-	// NUEVOS MÉTODOS PARA CONTROL DE NIVEL
 	setLevel(level: string) {
 		this.base.level = level;
 	}

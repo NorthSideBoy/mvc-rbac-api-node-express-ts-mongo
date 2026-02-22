@@ -1,7 +1,7 @@
 import type { Role } from "../../../enums/role.enum";
 import type { User } from "../../../types/user.type";
 
-type QueryUsersType = User.IQuery;
+type QueryUsersType = User.Query;
 
 export class QueryUsers {
 	page?: number;

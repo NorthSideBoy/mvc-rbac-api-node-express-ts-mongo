@@ -135,7 +135,7 @@ export class User implements Base {
 
 	public static async search(
 		this: UserModelType,
-		input: UserTypes.IQuery,
+		input: UserTypes.Query,
 	): Promise<Search<User>> {
 		// biome-ignore lint: Need to keep 'this' context for plugin method
 		const filters = this.buildFilters(input);

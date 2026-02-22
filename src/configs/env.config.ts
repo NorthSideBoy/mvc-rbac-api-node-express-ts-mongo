@@ -8,7 +8,6 @@ import {
 	passwordSchema,
 	usernameSchema,
 } from "../codecs/user/fields.schema";
-import type { User } from "../types/user.type";
 
 dotenv.config({ quiet: true });
 
@@ -70,15 +69,6 @@ const buildMongoUri = (): string => {
 
 const databaseUrl = buildMongoUri();
 
-const ADMIN: User.Env = {
-	firstname: e.ADMIN_FIRSTNAME,
-	lastname: e.ADMIN_LASTNAME,
-	username: e.ADMIN_USERNAME,
-	email: e.ADMIN_EMAIL,
-	password: e.ADMIN_PASSWORD,
-	birthday: e.ADMIN_BIRTHDAY,
-};
-
 export const env = Object.freeze({
 	HOST: e.HOST,
 	NODE_ENV: e.NODE_ENV,
@@ -97,9 +87,6 @@ export const env = Object.freeze({
 			MASK: databaseUrl.replace(/(:\/\/[^:]+:)[^@]+(@)/, "$1*****$2"),
 		},
 	},
-
-	ADMIN,
-
 	JWT: {
 		SECRET: e.JWT_SECRET,
 		EXPIRES_IN: e.JWT_EXPIRES_IN,

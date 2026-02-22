@@ -17,12 +17,10 @@ export namespace User {
 
 	export type Create = Omit<Schema, "id" | "createdAt" | "updatedAt">;
 
-	export type IQuery = Partial<Omit<User.Create, "birthday">> & {
+	export type Query = Partial<Omit<User.Create, "birthday">> & {
 		birthdayFrom?: Date;
 		birthdayTo?: Date;
 	} & QueryType;
 
 	export type Secure = Omit<Schema, "password">;
-
-	export type Env = Omit<Create, "role" | "enable"> & Pick<Schema, "password">;
 }

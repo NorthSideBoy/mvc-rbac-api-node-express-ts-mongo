@@ -6,14 +6,18 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"postinstall": "tsoa spec-and-routes",
+		"predev": "tsoa spec-and-routes",
 		"dev": "concurrently 'nodemon' 'nodemon -x tsoa spec-and-routes'",
+		"prebuild": "tsoa spec-and-routes",
 		"build": "tsc",
 		"start": "node ./dist/server.js",
 		"script": "ts-node --transpile-only ./scripts/index.ts",
 		"format": "npx @biomejs/biome format --write",
 		"lint": "npx @biomejs/biome lint --write",
 		"check": "npx @biomejs/biome check --write",
-		"check:unsafe": "npx @biomejs/biome check --write --unsafe"
+		"check:unsafe": "npx @biomejs/biome check --write --unsafe",
+		"clean": "rm -rf ./dist ./src/routes/routes.ts ./src/docs/swagger.json"
 	},
 	"repository": {
 		"type": "git",
