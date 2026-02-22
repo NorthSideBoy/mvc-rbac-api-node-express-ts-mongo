@@ -34,10 +34,7 @@ const startServer = async (): Promise<void> => {
 	await bootstrap();
 
 	const server = app.listen(env.PORT, env.HOST, () => {
-		logger.info(
-			{ host: env.HOST, port: env.PORT, mode: env.NODE_ENV },
-			"[HTTP] listening",
-		);
+		logger.info({ host: env.HOST, port: env.PORT }, "[HTTP] listening");
 		logger.info(
 			`Swagger docs available at http://${env.HOST}:${env.PORT}/docs`,
 		);

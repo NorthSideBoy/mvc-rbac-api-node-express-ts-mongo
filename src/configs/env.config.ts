@@ -59,7 +59,7 @@ if (!parsed.success) {
 
 const e = parsed.data;
 
-const buildMongoUrl = (): string => {
+const buildMongoUri = (): string => {
 	if (!e.DATABASE_URL || e.DATABASE_URL.includes("${")) {
 		const user = encodeURIComponent(e.DB_USER);
 		const password = encodeURIComponent(e.DB_PASSWORD);
@@ -67,6 +67,8 @@ const buildMongoUrl = (): string => {
 	}
 	return e.DATABASE_URL;
 };
+
+const databaseUrl = buildMongoUri();
 
 const ADMIN: User.Env = {
 	firstname: e.ADMIN_FIRSTNAME,
@@ -90,7 +92,10 @@ export const env = Object.freeze({
 		USER: e.DB_USER,
 		PASSWORD: e.DB_PASSWORD,
 		AUTH_SOURCE: e.DB_AUTH_SOURCE,
-		URL: buildMongoUrl(),
+		URL: {
+			PUBLIC: databaseUrl,
+			MASK: databaseUrl.replace(/(:\/\/[^:]+:)[^@]+(@)/, "$1*****$2"),
+		},
 	},
 
 	ADMIN,

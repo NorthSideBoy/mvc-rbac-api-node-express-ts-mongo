@@ -1,8 +1,9 @@
+import { env } from "./configs/env.config";
 import { Database } from "./configs/mongoose.config";
 import { logger } from "./utils/logger.util";
 
 export const bootstrap = async (): Promise<void> => {
-	logger.info("[APP] starting");
+	logger.info({ mode: env.NODE_ENV }, "[APP] starting");
 	await Database.connect();
 };
 

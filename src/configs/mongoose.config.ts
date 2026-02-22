@@ -5,12 +5,9 @@ import { env } from "./env.config";
 export const Database = {
 	async connect(): Promise<void> {
 		try {
-			await mongoose.connect(env.DB.URL);
+			await mongoose.connect(env.DB.URL.PUBLIC);
 
-			logger.info(
-				{ host: env.DB.HOST, port: env.DB.PORT, db: env.DB.NAME },
-				"[MongoDB] connected",
-			);
+			logger.info({ URI: env.DB.URL.MASK }, "[MongoDB] connected");
 		} catch (error) {
 			logger.error("[MongoDB] connection error");
 			throw error;
