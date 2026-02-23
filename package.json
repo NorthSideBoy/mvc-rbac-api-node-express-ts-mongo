@@ -1,7 +1,7 @@
 {
-	"name": "mvc-api-node-express-ts-mongo",
+	"name": "mvc-rbac-api-node-express-ts-mongo",
 	"version": "1.0.0",
-	"description": "RESTful API boilerplate with Node.js, Express, TypeScript, MongoDB and MVC pattern",
+	"description": "RESTful API RBAC boilerplate with Node.js, Express, TypeScript, TSOA, MongoDB and MVC pattern",
 	"type": "commonjs",
 	"main": "index.js",
 	"scripts": {
@@ -21,14 +21,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/NorthSideBoy/mvc-api-node-express-ts-mongo.git"
+		"url": "git+https://github.com/NorthSideBoy/mvc-rbac-api-node-express-ts-mongo.git"
 	},
 	"author": "Said Lucena <saidlucena519@gmail.com> (https://github.com/NorthSideBoy)",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/NorthSideBoy/mvc-api-node-express-ts-mongo/issues"
+		"url": "https://github.com/NorthSideBoy/mvc-rbac-api-node-express-ts-mongo/issues"
 	},
-	"homepage": "https://github.com/NorthSideBoy/mvc-api-node-express-ts-mongo#readme",
+	"homepage": "https://github.com/NorthSideBoy/mvc-rbac-api-node-express-ts-mongo#readme",
 	"dependencies": {
 		"@tsoa/runtime": "^7.0.0-alpha.0",
 		"@typegoose/typegoose": "^13.1.0",
