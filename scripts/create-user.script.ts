@@ -1,12 +1,4 @@
 import { confirm, input, password, select } from "@inquirer/prompts";
-import {
-	birthdaySchema,
-	emailSchema,
-	firstnameSchema,
-	lastnameSchema,
-	passwordSchema,
-	usernameSchema,
-} from "../src/codecs/user/fields.schema";
 import { context } from "../src/context/context.handler";
 import type ExecutionContext from "../src/context/execution-context";
 import { Role } from "../src/enums/role.enum";
@@ -14,7 +6,15 @@ import { parseSchema } from "../src/helpers/parse-schema.helper";
 import UserService from "../src/services/user.service";
 import type { User } from "../src/types/user.type";
 import { logger } from "../src/utils/logger.util";
-import type Script from "./script.";
+import { dateSchema } from "../src/validation/schemas/common.schemas";
+import {
+	emailSchema,
+	firstnameSchema,
+	lastnameSchema,
+	passwordSchema,
+	usernameSchema,
+} from "../src/validation/schemas/user.schemas";
+import type Script from "./script";
 
 export default class CreateUser implements Script {
 	readonly name = "create-user";
@@ -60,7 +60,7 @@ export default class CreateUser implements Script {
 		});
 		data.birthday = (await input({
 			message: "Enter user's birthday:",
-			validate: parseSchema(birthdaySchema),
+			validate: parseSchema(dateSchema),
 		})) as unknown as Date;
 		const password1 = await password({
 			message: "Enter user's password:",

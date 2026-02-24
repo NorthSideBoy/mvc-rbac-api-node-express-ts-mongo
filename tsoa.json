@@ -1,9 +1,9 @@
 {
 	"entryFile": "src/server.ts",
 	"noImplicitAdditionalProperties": "throw",
-	"controllerPathGlobs": ["src/controllers/*.ts"],
+	"controllerPathGlobs": ["src/api/rest/controllers/*.ts"],
 	"spec": {
-		"outputDirectory": "src/docs",
+		"outputDirectory": "src/api/rest/docs",
 		"specVersion": 3,
 		"basePath": "/",
 		"securityDefinitions": {
@@ -20,8 +20,8 @@
 		]
 	},
 	"routes": {
-		"routesDir": "src/routes",
+		"routesDir": "src/api/rest/routes",
 		"middleware": "express",
-		"authenticationModule": "src/middlewares/rest/auth.middleware.ts"
+		"authenticationModule": "src/api/rest/middlewares/auth.middleware.ts"
 	}
 }

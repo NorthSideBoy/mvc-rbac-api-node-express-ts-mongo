@@ -17,7 +17,7 @@
 		"lint": "npx @biomejs/biome lint --write",
 		"check": "npx @biomejs/biome check --write",
 		"check:unsafe": "npx @biomejs/biome check --write --unsafe",
-		"clean": "rm -rf ./dist ./src/routes/routes.ts ./src/docs/swagger.json"
+		"clean": "rm -rf ./dist ./src/api/rest/routes/routes.ts ./src/api/rest/docs/swagger.json"
 	},
 	"repository": {
 		"type": "git",
@@ -43,6 +43,7 @@
 		"express-rate-limit": "^8.2.1",
 		"inquirer": "^13.2.5",
 		"jsonwebtoken": "^9.0.3",
+		"moment": "^2.30.1",
 		"mongodb": "^7.1.0",
 		"mongoose-paginate-v2": "^1.9.1",
 		"pino": "^10.3.1",

@@ -1,6 +1,9 @@
 # Tsoa
-src/docs
-src/routes
+src/api/rest/docs
+src/api/rest/routes
+
+# Public
+public/*
 
 # Logs
 logs

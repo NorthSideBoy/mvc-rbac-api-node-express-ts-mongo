@@ -1,14 +1,4 @@
 import { result } from "../builders/result.builder";
-import { createUserCodec } from "../codecs/user/create-user.codec";
-import { loginUserCodec } from "../codecs/user/login-user.codec";
-import { searchUsersCodec } from "../codecs/user/query-users.codec";
-import { registerUserCodec } from "../codecs/user/register-user.codec";
-import { updateUserEmailCodec } from "../codecs/user/update-user-email.codec";
-import { updateUserPasswordCodec } from "../codecs/user/update-user-password.codec";
-import { updateUserProfileCodec } from "../codecs/user/update-user-profile.codec";
-import { updateUserRoleCodec } from "../codecs/user/update-user-role.codec";
-import { updateUserStatusCodec } from "../codecs/user/update-user-status.codec";
-import { updateUserUsernameCodec } from "../codecs/user/update-user-username.codec";
 import { context } from "../context/context.handler";
 import type ExecutionContext from "../context/execution-context";
 import type Result from "../DTOs/operation/output/result.dto";
@@ -38,6 +28,16 @@ import { OPERATIONS } from "../rbac/constants/operations.constant";
 import Actor from "../rbac/models/actor.model";
 import { tokenizer } from "../utils/tokenizer.util";
 import { decode } from "../utils/validator.util";
+import { createUserCodec } from "../validation/codecs/user/create-user.codec";
+import { loginUserCodec } from "../validation/codecs/user/login-user.codec";
+import { registerUserCodec } from "../validation/codecs/user/register-user.codec";
+import { searchUsersCodec } from "../validation/codecs/user/search-users.codec";
+import { updateUserEmailCodec } from "../validation/codecs/user/update-user-email.codec";
+import { updateUserPasswordCodec } from "../validation/codecs/user/update-user-password.codec";
+import { updateUserProfileCodec } from "../validation/codecs/user/update-user-profile.codec";
+import { updateUserRoleCodec } from "../validation/codecs/user/update-user-role.codec";
+import { updateUserStatusCodec } from "../validation/codecs/user/update-user-status.codec";
+import { updateUserUsernameCodec } from "../validation/codecs/user/update-user-username.codec";
 
 export default class UserService {
 	constructor(readonly ctx: ExecutionContext = context.get()) {}

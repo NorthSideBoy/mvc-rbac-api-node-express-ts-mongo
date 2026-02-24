@@ -10,8 +10,8 @@
 		"includes": [
 			"**",
 			"!dist",
-			"!src/routes",
-			"!src/docs",
+			"!src/api/rest/routes",
+			"!src/api/rest/docs",
 			"!src/plugins/paginated-query.plugin.ts"
 		]
 	},

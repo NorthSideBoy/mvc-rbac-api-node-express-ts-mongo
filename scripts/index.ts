@@ -5,7 +5,7 @@ import { context } from "../src/context/context.handler";
 import ExecutionContext from "../src/context/execution-context";
 import { logger } from "../src/utils/logger.util";
 import CreateUser from "./create-user.script";
-import type Script from "./script.";
+import type Script from "./script";
 import Test from "./test.script";
 
 type ScriptFactory = () => Script;

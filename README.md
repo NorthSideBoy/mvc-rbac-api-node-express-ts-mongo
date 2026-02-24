@@ -234,8 +234,9 @@ Main npm scripts (from `package.json`):
 - `npm run script -- create-user`: interactive user creation script.
 - `npm run format`: formats code with Biome.
 - `npm run lint`: lints (and writes fixes) with Biome.
-- `npm run check`: runs Biome checks (and writes fixes).
-- `npm run clean`: removes build output and generated tsoa artifacts (`dist/`, `src/routes/routes.ts`, `src/docs/swagger.json`).
+- `npm run check`: runs Biome checks.
+- `npm run check:unsafe`: runs Biome checks (and writes fixes).
+- `npm run clean`: removes build output and generated tsoa artifacts (`dist/`, `src/api/rest/routes/routes.ts`, `src/api/rest/docs/swagger.json`).
 
 > `postinstall`, `predev`, and `prebuild` run `tsoa spec-and-routes` automatically.
 
@@ -382,53 +383,11 @@ Examples:
 
 ### Enforcement strategy
 
-- **Authentication + minimum role (REST)** is handled by tsoa `@Security` and `src/middlewares/rest/auth.middleware.ts`.
-- **Authentication + minimum role (GraphQL)** is handled by type-graphql middlewares in `src/middlewares/graphql`.
+- **Authentication + minimum role (REST)** is handled by tsoa `@Security` and `src/api/rest/middlewares/auth.middleware.ts`.
+- **Authentication + minimum role (GraphQL)** is handled by type-graphql middlewares in `src/api/graphql/middlewares/auth.middleware.ts`.
 - **Fine-grained authorization** is enforced inside services with `actor.can(...)` / `actor.canManage(...)` checks.
 
 This keeps controllers thin and ensures authorization remains consistent even if services are used outside the HTTP layer (e.g., scripts).
-
-## Project structure
-
-High-level layout:
-
-```text
-.
-├── docker/                 # Mongo entrypoint + replica set init scripts
-├── scripts/                # CLI scripts (e.g., create-user)
-├── src/
-│   ├── builders/           # Builder pattern for object creation (e.g., Result)
-│   ├── codecs/             # Zod validation schemas
-│   ├── context/            # Execution context management
-│   ├── configs/            # Env + MongoDB connection setup
-│   ├── contracts/          # Shared interface and contract definitions (e.g., Actor, Query)
-│   ├── controllers/        # TSOA controllers (HTTP layer)
-│   ├── docs/               # Generated OpenAPI spec (tsoa)
-│   ├── DTOs/               # TSOA DTOs for OpenAPI typing
-│   ├── enums/              # Global application enumerations (error codes, roles, etc.)
-│   ├── errors/             # Custom error hierarchy (ApplicationError, HTTP errors, etc.)
-│   ├── helpers/            # Small, reusable utility functions
-│   ├── mappers/            # Data transformation between layers (e.g., Model <-> DTO)
-│   ├── middlewares/        # Auth, context, error handling, rate limiters
-│   │   ├── common/         # Shared auth/context utilities
-│   │   ├── graphql/        # type-graphql middlewares
-│   │   └── rest/           # Express/tsoa middlewares
-│   ├── models/             # Typegoose/Mongoose models
-│   ├── plugins/            # Mongoose plugins (pagination, timestamps, etc.)
-│   ├── rbac/               # Roles, permissions, policy engine
-│   ├── resolvers/          # type-graphql resolvers
-│   ├── routes/             # Generated routes (tsoa)
-│   ├── schemas/            # GraphQL schema classes (type-graphql)
-│   ├── security/           # JWT claims, actors, access grants
-│   ├── services/           # Business logic + RBAC checks
-│   ├── types/              # Global TypeScript type definitions (Extended Request, Tokens)
-│   ├── utils/              # Cross-cutting utilities (hasher, logger, tokenizer, validator)
-│   ├── bootstrap.ts        # Application initialization entry point
-│   └── server.ts           # App bootstrap + middleware wiring
-├── docker-compose.yml
-├── package.json
-└── tsoa.json
-```
 
 ## Contributing
 
