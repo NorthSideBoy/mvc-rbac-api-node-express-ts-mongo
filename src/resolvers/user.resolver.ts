@@ -9,6 +9,7 @@ import {
 import { Role } from "../enums/role.enum";
 import { authGuard } from "../middlewares/graphql/auth.middleware";
 import { contextMiddleware } from "../middlewares/graphql/context.middleware";
+import { authLimiter } from "../middlewares/graphql/rate-limiter.middleware";
 import PaginationGQL from "../schemas/operation/output/pagination.schema";
 import ResultGQL from "../schemas/operation/output/result.schema";
 // biome-ignore lint: GQL schemas should not be type
@@ -49,14 +50,17 @@ export default class UserResolver {
 		const userService = new UserService();
 		const result = await userService.register(data);
 		const gql = this.mapper.toClass(AuthenticatedUserGQL, result);
+
 		return gql;
 	}
 
 	@Mutation(() => AuthenticatedUserGQL)
+	@UseMiddleware(authLimiter())
 	async login(@Arg("data") data: LoginUserGQL): Promise<AuthenticatedUserGQL> {
 		const userService = new UserService();
 		const result = await userService.login(data);
 		const gql = this.mapper.toClass(AuthenticatedUserGQL, result);
+
 		return gql;
 	}
 

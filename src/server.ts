@@ -14,7 +14,7 @@ import { errorMiddleware } from "./middlewares/rest/error.middleware";
 import { generalLimiter } from "./middlewares/rest/rate-limiter.middleware";
 import UserResolver from "./resolvers/user.resolver";
 import { RegisterRoutes } from "./routes/routes";
-import type { ExtendedRequest } from "./types/extended-request.type";
+import type { GraphQLContext } from "./types/graphql-context.type";
 import { logger } from "./utils/logger.util";
 
 const app = express();
@@ -46,7 +46,7 @@ const start = async (): Promise<void> => {
 		validate: false,
 	});
 
-	const apollo = new ApolloServer({
+	const apollo = new ApolloServer<GraphQLContext>({
 		schema,
 		plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
 	});
@@ -58,8 +58,8 @@ const start = async (): Promise<void> => {
 		cors<cors.CorsRequest>({ origin: env.CORS.ORIGIN }),
 		express.json(),
 		expressMiddleware(apollo, {
-			context: async ({ req }): Promise<ExtendedRequest> => {
-				return req;
+			context: async ({ req, res }): Promise<GraphQLContext> => {
+				return { req, res };
 			},
 		}),
 	);

@@ -1,11 +1,12 @@
 import type { MiddlewareFn } from "type-graphql";
-import type { ExtendedRequest } from "../../types/extended-request.type";
+import type { GraphQLContext } from "../../types/graphql-context.type";
 import { contextualize } from "../common/context.common";
 
-export function contextMiddleware(): MiddlewareFn<ExtendedRequest> {
+export function contextMiddleware(): MiddlewareFn<GraphQLContext> {
 	return async ({ context }, next) => {
-		const ctx = contextualize(context.access);
-		context.context = ctx;
+		const { req } = context;
+		const ctx = contextualize(req.access);
+		req.context = ctx;
 		return await next();
 	};
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-# MVC RBAC API — Node.js + Express + TypeScript + MongoDB
+# MVC RBAC API — Node.js + Express + GraphQL + TypeScript + MongoDB
 
 RESTful API boilerplate implementing **MVC** + **RBAC (Role-Based Access Control)** with **JWT** authentication, **OpenAPI/Swagger** documentation (via **tsoa**), and a ready-to-use **MongoDB Docker Compose** setup.
 
@@ -52,7 +52,7 @@ Building APIs is easy; building **secure** APIs that scale in complexity is hard
 - **GraphQL API**: Apollo Server + type-graphql on `POST /graphql`.
 - **MongoDB via Docker Compose** (replica set initialized automatically).
 - **Request validation** with Zod (422 responses include validation details).
-- **Rate limiting** (global + stricter limiter for login).
+- **Rate limiting** Express + GraphQL (global + stricter limiter for 'auth').
 - **Structured logging** with Pino.
 - **Lint/format** with Biome.
 
