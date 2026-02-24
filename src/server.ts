@@ -10,6 +10,7 @@ import { buildSchema } from "type-graphql";
 import { bootstrap, shutdown } from "./bootstrap";
 import { env } from "./configs/env.config";
 import swaggerDocument from "./docs/swagger.json";
+import { formatGraphQLError } from "./middlewares/graphql/error.middleware";
 import { errorMiddleware } from "./middlewares/rest/error.middleware";
 import { generalLimiter } from "./middlewares/rest/rate-limiter.middleware";
 import UserResolver from "./resolvers/user.resolver";
@@ -47,6 +48,7 @@ const start = async (): Promise<void> => {
 	});
 
 	const apollo = new ApolloServer<GraphQLContext>({
+		formatError: formatGraphQLError,
 		schema,
 		plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
 	});
