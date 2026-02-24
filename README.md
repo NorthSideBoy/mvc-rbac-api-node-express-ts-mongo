@@ -14,7 +14,7 @@ RESTful API boilerplate implementing **MVC** + **RBAC (Role-Based Access Control
 [![Docker](https://img.shields.io/badge/docker-24.x-2496ED?logo=docker&logoColor=white)](#tech-stack)
 [![Swagger](https://img.shields.io/badge/openapi-swagger-85EA2D?logo=swagger&logoColor=black)](#api-documentation)
 [![JWT](https://img.shields.io/badge/jwt-auth-000000?logo=jsonwebtokens&logoColor=white)](#authentication)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NorthSideBoy/mvc-rbac-api-node-express-ts-mongo)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NorthSideBoy/mvc-api-node-ts-rbac-express-graphql-mongo)
 
 </div>
 
