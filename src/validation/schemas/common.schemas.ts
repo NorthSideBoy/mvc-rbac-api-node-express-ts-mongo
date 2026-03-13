@@ -17,6 +17,8 @@ export const jwtSchema = z
 	);
 
 export const querySchema = {
+	string: z.string().trim().min(1).optional(),
+	number: z.coerce.number().int().min(1),
 	boolean: z.preprocess((val) => {
 		if (typeof val !== "string") return val;
 		const normalized = val.trim().toLowerCase();

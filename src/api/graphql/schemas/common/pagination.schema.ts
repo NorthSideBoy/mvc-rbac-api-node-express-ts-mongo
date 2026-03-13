@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "type-graphql";
-import type Pagination from "../../../../../DTOs/operation/output/pagination.dto";
+import type Pagination from "../../../../types/pagination.type";
 
 @ObjectType("Pagination")
 export default class PaginationGQL implements Pagination {

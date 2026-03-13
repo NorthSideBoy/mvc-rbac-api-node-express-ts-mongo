@@ -1,7 +1,7 @@
 import type { Role } from "../enums/role.enum";
 import type { Token } from "./token.type";
 export namespace Access {
-	export type Claims = {
+	export interface Claims {
 		subject: string;
 		username: string;
 		role: Role;
@@ -9,7 +9,7 @@ export namespace Access {
 		issuedAt: number;
 		expiresAt: number;
 		raw: Token.Payload;
-	};
+	}
 
 	export type Grant = Claims;
 }

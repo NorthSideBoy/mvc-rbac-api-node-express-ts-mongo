@@ -1,13 +1,6 @@
-import type { Role } from "../../../enums/role.enum";
+import type IUser from "../../../contracts/user.contract";
 
-export default class CreateUser {
-	firstname: string;
-	lastname: string;
-	username: string;
-	email: string;
-	role: Role;
-	password: string;
-	birthday: Date;
-	enable?: boolean;
-	picture?: File;
-}
+export type CreateUser = Omit<
+	IUser,
+	"id" | "createdAt" | "updatedAt" | "picture" | "enable"
+> & { enable?: boolean; picture?: File };

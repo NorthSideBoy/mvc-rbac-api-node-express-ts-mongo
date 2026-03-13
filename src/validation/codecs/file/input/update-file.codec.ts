@@ -1,24 +1,8 @@
 import z from "zod";
-import {
-	altSchema,
-	extSchema,
-	filenameSchema,
-	mimetypeSchema,
-	pathSchema,
-	sizeSchema,
-	visibilitySchema,
-} from "../../../schemas/file.schemas";
+import { CreateFileCodec } from "./create-file.codec";
 
 export const UpdateFileCodec = z
-	.object({
-		alt: altSchema.optional(),
-		filename: filenameSchema.optional(),
-		size: sizeSchema.optional(),
-		mimetype: mimetypeSchema.optional(),
-		ext: extSchema.optional(),
-		path: pathSchema.optional(),
-		visibility: visibilitySchema.optional(),
-	})
+	.object(CreateFileCodec.optional())
 	.partial()
 	.strict()
 	.refine(

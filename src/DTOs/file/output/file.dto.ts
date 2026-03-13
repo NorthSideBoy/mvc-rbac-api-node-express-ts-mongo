@@ -1,14 +1,5 @@
-import type { Mimetype } from "../../../enums/mimetype.enum";
+import type { IFile } from "../../../contracts/file.contract";
 
-export default class File {
-	id: string;
-	alt: string;
-	filename: string;
-	size: number;
-	mimetype: Mimetype;
-	path: string;
-	ext: string;
+export interface File extends IFile {
 	url: string;
-	createdAt: Date;
-	updatedAt: Date;
 }

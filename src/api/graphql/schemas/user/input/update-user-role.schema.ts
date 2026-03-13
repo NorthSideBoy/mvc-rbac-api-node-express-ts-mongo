@@ -1,5 +1,5 @@
 import { Field, InputType, registerEnumType } from "type-graphql";
-import type UpdateUserRole from "../../../../../DTOs/user/input/update-user-role.dto";
+import type { UpdateUserRole } from "../../../../../DTOs/user/input/update-user-role.dto";
 import { UpdateRole } from "../../../../../enums/role.enum";
 
 registerEnumType(UpdateRole, {

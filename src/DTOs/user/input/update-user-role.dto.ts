@@ -1,5 +1,5 @@
 import type { UpdateRole } from "../../../enums/role.enum";
 
-export default class UpdateUserRole {
+export interface UpdateUserRole {
 	role: UpdateRole;
 }

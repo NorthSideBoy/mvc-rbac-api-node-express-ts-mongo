@@ -16,7 +16,7 @@ export const userCodec = z
 		lastname: lastnameSchema,
 		username: usernameSchema,
 		email: emailSchema,
-		picture: fileCodec.or(idSchema),
+		picture: fileCodec,
 		birthday: dateSchema,
 		enable: z.boolean().default(true),
 		role: roleSchema,

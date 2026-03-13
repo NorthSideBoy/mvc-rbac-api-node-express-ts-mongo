@@ -1,11 +1,10 @@
 import z from "zod";
 import { fileSchema } from "../../../schemas/common.schemas";
-import { filenameSchema, pathSchema } from "../../../schemas/file.schemas";
+import { readFileCodec } from "./read-file.codec";
 
 export const overwriteFileCodec = z
 	.object({
-		filepath: pathSchema,
-		filename: filenameSchema,
+		...readFileCodec.shape,
 		file: fileSchema,
 	})
 	.strict();

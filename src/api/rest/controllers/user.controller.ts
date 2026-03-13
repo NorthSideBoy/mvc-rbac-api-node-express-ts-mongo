@@ -16,17 +16,17 @@ import {
 	UploadedFile,
 } from "tsoa";
 import type Result from "../../../DTOs/operation/output/result.dto";
-import type LoginUser from "../../../DTOs/user/input/login-user.dto";
-import type SearchUsers from "../../../DTOs/user/input/search-users.dto";
-import type UpdateUserEmail from "../../../DTOs/user/input/update-user-email.dto";
-import type UpdateUserPassword from "../../../DTOs/user/input/update-user-password.dto";
-import type UpdateUserProfile from "../../../DTOs/user/input/update-user-profile.dto";
-import type UpdateUserRole from "../../../DTOs/user/input/update-user-role.dto";
-import type UpdateUserStatus from "../../../DTOs/user/input/update-user-status.dto";
-import type UpdateUserUsername from "../../../DTOs/user/input/update-user-username.dto";
-import type AuthenticatedUser from "../../../DTOs/user/output/authenticated-user.dto";
-import type SearchUser from "../../../DTOs/user/output/search-user.dto";
-import type User from "../../../DTOs/user/output/user.dto";
+import type { LoginUser } from "../../../DTOs/user/input/login-user.dto";
+import type { QueryUsers } from "../../../DTOs/user/input/query-users.dto";
+import type { UpdateUserEmail } from "../../../DTOs/user/input/update-user-email.dto";
+import type { UpdateUserPassword } from "../../../DTOs/user/input/update-user-password.dto";
+import type { UpdateUserProfile } from "../../../DTOs/user/input/update-user-profile.dto";
+import type { UpdateUserRole } from "../../../DTOs/user/input/update-user-role.dto";
+import type { UpdateUserStatus } from "../../../DTOs/user/input/update-user-status.dto";
+import type { UpdateUserUsername } from "../../../DTOs/user/input/update-user-username.dto";
+import type { AuthenticatedUser } from "../../../DTOs/user/output/authenticated-user.dto";
+import type { User } from "../../../DTOs/user/output/user.dto";
+import type { UsersSearch } from "../../../DTOs/user/output/users-search";
 import { Role, type UpdateRole } from "../../../enums/role.enum";
 import UserService from "../../../services/user.service";
 import { contextMiddleware } from "../middlewares/context.middleware";
@@ -96,7 +96,7 @@ export class UserController extends BaseController {
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
 	@Middlewares([contextMiddleware])
-	async search(@Queries() query: SearchUsers): Promise<SearchUser> {
+	async search(@Queries() query: QueryUsers): Promise<UsersSearch> {
 		return await this.userService.search(query);
 	}
 

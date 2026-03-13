@@ -1,5 +1,5 @@
 import { Field, InputType } from "type-graphql";
-import type UpdateUserProfile from "../../../../../DTOs/user/input/update-user-profile.dto";
+import type { UpdateUserProfile } from "../../../../../DTOs/user/input/update-user-profile.dto";
 
 @InputType("UpdateUserProfile")
 export default class UpdateUserProfileGQL implements UpdateUserProfile {

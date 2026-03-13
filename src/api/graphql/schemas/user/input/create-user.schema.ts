@@ -1,5 +1,5 @@
 import { Field, InputType } from "type-graphql";
-import type CreateUser from "../../../../../DTOs/user/input/create-user.dto";
+import type { CreateUser } from "../../../../../DTOs/user/input/create-user.dto";
 import { Role } from "../../../../../enums/role.enum";
 
 @InputType("CreateUser")

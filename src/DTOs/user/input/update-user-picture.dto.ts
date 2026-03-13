@@ -1,3 +1,3 @@
-export default class UpdateUserPicture {
-	picture: File;
-}
+import type { CreateUser } from "./create-user.dto";
+
+export type UpdateUserPicture = Required<Pick<CreateUser, "picture">>;

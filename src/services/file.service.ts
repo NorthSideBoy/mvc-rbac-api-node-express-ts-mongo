@@ -1,7 +1,7 @@
 import { result } from "../builders/result.builder";
 import type { CreateFile } from "../DTOs/file/input/create-file.dto";
 import type { UpdateFile } from "../DTOs/file/input/update-file.dto";
-import type { default as DTO } from "../DTOs/file/output/file.dto";
+import type { File as DTO } from "../DTOs/file/output/file.dto";
 import type Result from "../DTOs/operation/output/result.dto";
 import File from "../models/file.model";
 import { decode } from "../utils/validator.util";
@@ -12,11 +12,13 @@ import BaseService from "./base.service";
 export default class FileService extends BaseService {
 	async create(input: CreateFile): Promise<DTO> {
 		const decoded = decode<CreateFile>(CreateFileCodec, input);
-		return await File.create(decoded);
+		const file = await File.create(decoded);
+		return file.dto();
 	}
 
 	async findByFilename(filename: string): Promise<DTO | null> {
-		return File.findByFilename(filename);
+		const file = await File.findByFilename(filename);
+		return file?.dto() || null;
 	}
 
 	async update(id: string, input: UpdateFile): Promise<Result> {

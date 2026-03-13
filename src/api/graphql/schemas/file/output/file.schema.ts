@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from "type-graphql";
-import type File from "../../../../../DTOs/file/output/file.dto";
+import type { File } from "../../../../../DTOs/file/output/file.dto";
+import type { FileVisibility } from "../../../../../enums/file-visibility.enum";
 import type { Mimetype } from "../../../../../enums/mimetype.enum";
 
 @ObjectType("File")
@@ -27,6 +28,9 @@ export default class FileGQL implements File {
 
 	@Field()
 	ext: string;
+
+	@Field()
+	visibility: FileVisibility;
 
 	@Field()
 	createdAt: Date;

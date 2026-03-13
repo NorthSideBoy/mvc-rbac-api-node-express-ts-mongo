@@ -99,7 +99,7 @@ interface Result<T> {
 export interface PaginateModel<T> extends Model<T> {
   paginate: (
     query?: any,
-    options?: { page?: number; limit?: number; sort?: Record<string, 1 | -1> },
+    options?: { page?: number; limit?: number; sort?: Record<string, 1 | -1>, lean?:boolean },
   ) => Promise<Result<T>>;
   buildFilters(input: Record<string, any>): Record<string, any>;
   getPaginationOptions(options?: any): { page: number; limit: number; sort: SortSpec };

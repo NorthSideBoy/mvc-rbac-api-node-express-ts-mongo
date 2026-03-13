@@ -1,5 +1,5 @@
 import { Field, InputType } from "type-graphql";
-import type LoginUser from "../../../../../DTOs/user/input/login-user.dto";
+import type { LoginUser } from "../../../../../DTOs/user/input/login-user.dto";
 
 @InputType("LoginUser")
 export default class LoginUserGQL implements LoginUser {

@@ -1,3 +1,3 @@
-export default class UpdateUserUsername {
-	username: string;
-}
+import type { CreateUser } from "./create-user.dto";
+
+export type UpdateUserUsername = Required<Pick<CreateUser, "username">>;
