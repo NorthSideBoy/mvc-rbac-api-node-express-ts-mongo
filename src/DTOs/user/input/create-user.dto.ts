@@ -1,7 +1,4 @@
 import type { Role } from "../../../enums/role.enum";
-import type { User } from "../../../types/user.type";
-
-type CreateUserType = User.Create;
 
 export default class CreateUser {
 	firstname: string;
@@ -12,6 +9,5 @@ export default class CreateUser {
 	password: string;
 	birthday: Date;
 	enable?: boolean;
+	picture?: File;
 }
-
-const _typeCheck: CreateUserType = {} as CreateUser;

@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { dateSchema } from "../../schemas/common.schemas";
-import { firstnameSchema, lastnameSchema } from "../../schemas/user.schemas";
+import z from "zod";
+import { dateSchema } from "../../../schemas/common.schemas";
+import { firstnameSchema, lastnameSchema } from "../../../schemas/user.schemas";
 
 export const updateUserProfileCodec = z
 	.object({

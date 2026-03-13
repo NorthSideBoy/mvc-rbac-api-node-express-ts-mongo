@@ -1,7 +1,5 @@
 import type { Role } from "../../../enums/role.enum";
-import type { User } from "../../../types/user.type";
-
-type AuthenticatedUserType = User.Secure & { token: string };
+import type File from "../../file/output/file.dto";
 
 export default class AuthenticatedUser {
 	id: string;
@@ -10,11 +8,10 @@ export default class AuthenticatedUser {
 	username: string;
 	role: Role;
 	email: string;
+	picture: File;
 	birthday: Date;
 	enable: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	token: string;
 }
-
-const _typeCheck: AuthenticatedUserType = {} as AuthenticatedUser;

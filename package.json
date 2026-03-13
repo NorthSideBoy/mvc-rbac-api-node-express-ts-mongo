@@ -45,6 +45,7 @@
 		"jsonwebtoken": "^9.0.3",
 		"moment": "^2.30.1",
 		"mongodb": "^7.1.0",
+		"mongoose-autopopulate": "^1.2.1",
 		"mongoose-paginate-v2": "^1.9.1",
 		"multer": "^2.0.2",
 		"pino": "^10.3.1",

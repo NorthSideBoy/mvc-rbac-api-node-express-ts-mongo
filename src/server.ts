@@ -28,6 +28,7 @@ app.use(
 app.use(cors({ origin: config.cors.origin }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("storage"));
 app.use(generalLimiter);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -48,9 +49,9 @@ const start = async (): Promise<void> => {
 	});
 
 	const apollo = new ApolloServer<GraphQLContext>({
-		formatError: formatGraphQLError,
 		schema,
 		plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
+		formatError: formatGraphQLError,
 	});
 
 	await apollo.start();

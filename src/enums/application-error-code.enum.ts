@@ -9,4 +9,5 @@ export enum ApplicationErrorCode {
 	TokenTampered = "TOKEN_TAMPERED",
 	TokenBefore = "TOKEN_BEFORE",
 	DuplicatePassword = "DUPLICATE_PASSWORD",
+	FileNotFound = "FILE_NOT_FOUND",
 }

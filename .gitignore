@@ -2,8 +2,10 @@
 src/api/rest/docs
 src/api/rest/routes
 
-# Public
-public/*
+# Storage
+storage/public/user/*
+!storage/public/user/default.jpeg
+storage/private/*
 
 # Logs
 logs

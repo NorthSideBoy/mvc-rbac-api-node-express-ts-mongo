@@ -7,4 +7,6 @@ export type Action =
 	| "update-profile"
 	| "update-username"
 	| "update-role"
-	| "update-status";
+	| "update-status"
+	| "update-picture"
+	| "delete-picture";

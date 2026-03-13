@@ -70,6 +70,7 @@ export const errorMiddleware: ErrorRequestHandler = (
 
 	if (error instanceof Error) {
 		logger.error({ error }, "[HTTP] unexpected error");
+		console.log(error);
 		return response.status(500).json({
 			message: "Internal server error",
 			code: HttpErrorCode.InternalError,

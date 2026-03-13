@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { dateSchema } from "../../schemas/common.schemas";
+import z from "zod";
+import { dateSchema, imageSchema } from "../../../schemas/common.schemas";
 import {
 	emailSchema,
 	firstnameSchema,
@@ -7,7 +7,7 @@ import {
 	passwordSchema,
 	roleSchema,
 	usernameSchema,
-} from "../../schemas/user.schemas";
+} from "../../../schemas/user.schemas";
 
 export const createUserCodec = z
 	.object({
@@ -15,9 +15,10 @@ export const createUserCodec = z
 		lastname: lastnameSchema,
 		username: usernameSchema,
 		email: emailSchema,
+		role: roleSchema,
+		picture: imageSchema.optional(),
 		password: passwordSchema,
 		birthday: dateSchema,
 		enable: z.boolean().default(true),
-		role: roleSchema,
 	})
 	.strict();

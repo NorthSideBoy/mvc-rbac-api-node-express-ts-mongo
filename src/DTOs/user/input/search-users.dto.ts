@@ -1,9 +1,6 @@
 import type { Role } from "../../../enums/role.enum";
-import type { User } from "../../../types/user.type";
 
-type QueryUsersType = User.Query;
-
-export default class QueryUsers {
+export default class SearchUsers {
 	page?: number;
 	limit?: number;
 	sort?: string;
@@ -21,5 +18,3 @@ export default class QueryUsers {
 	createdAtFrom?: Date;
 	createdAtTo?: Date;
 }
-
-const _typeCheck: QueryUsersType = {} as QueryUsers;

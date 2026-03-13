@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type z from "zod";
 
 export function parseSchema<T>(schema: z.ZodSchema<T>) {
 	return (value: unknown): string | boolean => {

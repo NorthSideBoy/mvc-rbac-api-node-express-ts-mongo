@@ -1,9 +1,9 @@
 import { Field, InputType } from "type-graphql";
-import type QueryUsers from "../../../../../DTOs/user/input/query-users.dto";
+import type SearchUsers from "../../../../../DTOs/user/input/search-users.dto";
 import type { Role } from "../../../../../enums/role.enum";
 
 @InputType("QueryUser")
-export default class QueryUsersGQL implements QueryUsers {
+export default class QueryUsersGQL implements SearchUsers {
 	@Field({ nullable: true })
 	page?: number;
 

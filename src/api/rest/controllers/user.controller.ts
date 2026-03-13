@@ -1,7 +1,7 @@
 import {
 	Body,
-	Controller,
 	Delete,
+	FormField,
 	Get,
 	Middlewares,
 	Path,
@@ -13,12 +13,11 @@ import {
 	Security,
 	SuccessResponse,
 	Tags,
+	UploadedFile,
 } from "tsoa";
 import type Result from "../../../DTOs/operation/output/result.dto";
-import type CreateUser from "../../../DTOs/user/input/create-user.dto";
 import type LoginUser from "../../../DTOs/user/input/login-user.dto";
-import type QueryUsers from "../../../DTOs/user/input/query-users.dto";
-import type RegisterUser from "../../../DTOs/user/input/register-user.dto";
+import type SearchUsers from "../../../DTOs/user/input/search-users.dto";
 import type UpdateUserEmail from "../../../DTOs/user/input/update-user-email.dto";
 import type UpdateUserPassword from "../../../DTOs/user/input/update-user-password.dto";
 import type UpdateUserProfile from "../../../DTOs/user/input/update-user-profile.dto";
@@ -28,14 +27,15 @@ import type UpdateUserUsername from "../../../DTOs/user/input/update-user-userna
 import type AuthenticatedUser from "../../../DTOs/user/output/authenticated-user.dto";
 import type SearchUser from "../../../DTOs/user/output/search-user.dto";
 import type User from "../../../DTOs/user/output/user.dto";
-import { Role } from "../../../enums/role.enum";
+import { Role, type UpdateRole } from "../../../enums/role.enum";
 import UserService from "../../../services/user.service";
 import { contextMiddleware } from "../middlewares/context.middleware";
 import { authLimiter } from "../middlewares/rate-limiter.middleware";
+import { BaseController } from "./base.controller";
 
 @Route("users")
 @Tags("Users")
-export class UserController extends Controller {
+export class UserController extends BaseController {
 	private readonly userService = new UserService();
 	/**
 	 * @summary Register user
@@ -47,8 +47,26 @@ export class UserController extends Controller {
 	@Response(422, "UnprocessableEntity")
 	@Response(429, "TooManyRequests")
 	@Response(500, "InternalServerError")
-	async register(@Body() body: RegisterUser): Promise<AuthenticatedUser> {
-		return this.userService.register(body);
+	async register(
+		@FormField() firstname: string,
+		@FormField() lastname: string,
+		@FormField() username: string,
+		@FormField() email: string,
+		@FormField() password: string,
+		@FormField() birthday: Date,
+		@FormField() enable?: boolean,
+		@UploadedFile() upload?: Express.Multer.File,
+	): Promise<AuthenticatedUser> {
+		return await this.userService.register({
+			firstname,
+			lastname,
+			username,
+			email,
+			password,
+			birthday,
+			enable,
+			picture: this.handleFile(upload),
+		});
 	}
 
 	/**
@@ -63,8 +81,8 @@ export class UserController extends Controller {
 	@Response(429, "TooManyRequests")
 	@Response(500, "InternalServerError")
 	@Middlewares([authLimiter])
-	async login(@Body() body: LoginUser): Promise<AuthenticatedUser> {
-		return this.userService.login(body);
+	async login(@Body() body: LoginUser | unknown): Promise<AuthenticatedUser> {
+		return await this.userService.login(body);
 	}
 
 	/**
@@ -78,8 +96,8 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.USER])
 	@Middlewares([contextMiddleware])
-	async search(@Queries() query: QueryUsers): Promise<SearchUser> {
-		return this.userService.search(query);
+	async search(@Queries() query: SearchUsers): Promise<SearchUser> {
+		return await this.userService.search(query);
 	}
 
 	/**
@@ -93,7 +111,7 @@ export class UserController extends Controller {
 	@Security("Bearer", [Role.USER])
 	@Middlewares([contextMiddleware])
 	async findById(@Path() id: string): Promise<User | null> {
-		return this.userService.findById(id);
+		return await this.userService.findById(id);
 	}
 
 	/**
@@ -107,7 +125,7 @@ export class UserController extends Controller {
 	@Security("Bearer", [Role.USER])
 	@Middlewares([contextMiddleware])
 	async findAll(): Promise<User[]> {
-		return this.userService.findAll();
+		return await this.userService.findAll();
 	}
 
 	/**
@@ -123,9 +141,29 @@ export class UserController extends Controller {
 	@Response(500, "InternalServerError")
 	@Security("Bearer", [Role.MANAGER])
 	@Middlewares([contextMiddleware])
-	async create(@Body() body: CreateUser): Promise<User> {
+	async create(
+		@FormField() firstname: string,
+		@FormField() lastname: string,
+		@FormField() username: string,
+		@FormField() email: string,
+		@FormField() password: string,
+		@FormField() role: UpdateRole,
+		@FormField() birthday: Date,
+		@FormField() enable?: boolean,
+		@UploadedFile() upload?: Express.Multer.File,
+	): Promise<User> {
 		this.setStatus(201);
-		return this.userService.create(body);
+		return await this.userService.create({
+			firstname,
+			lastname,
+			username,
+			email,
+			password,
+			role,
+			birthday,
+			enable,
+			picture: this.handleFile(upload),
+		});
 	}
 
 	/**
@@ -144,9 +182,9 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async update(
 		@Path() id: string,
-		@Body() body: UpdateUserProfile,
+		@Body() body: UpdateUserProfile | unknown,
 	): Promise<Result> {
-		return this.userService.updateProfile(id, body);
+		return await this.userService.updateProfile(id, body);
 	}
 
 	/**
@@ -164,9 +202,9 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async updateStatus(
 		@Path() id: string,
-		@Body() body: UpdateUserStatus,
+		@Body() body: UpdateUserStatus | unknown,
 	): Promise<Result> {
-		return this.userService.updateStatus(id, body);
+		return await this.userService.updateStatus(id, body);
 	}
 
 	/**
@@ -184,9 +222,9 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async updateRole(
 		@Path() id: string,
-		@Body() body: UpdateUserRole,
+		@Body() role: UpdateUserRole | unknown,
 	): Promise<Result> {
-		return this.userService.updateRole(id, body);
+		return await this.userService.updateRole(id, role);
 	}
 
 	/**
@@ -204,9 +242,9 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async updatePassword(
 		@Path() id: string,
-		@Body() body: UpdateUserPassword,
+		@Body() body: UpdateUserPassword | unknown,
 	): Promise<Result> {
-		return this.userService.updatePassword(id, body);
+		return await this.userService.updatePassword(id, body);
 	}
 
 	/**
@@ -225,9 +263,9 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async updateEmail(
 		@Path() id: string,
-		@Body() body: UpdateUserEmail,
+		@Body() body: UpdateUserEmail | unknown,
 	): Promise<Result> {
-		return this.userService.updateEmail(id, body);
+		return await this.userService.updateEmail(id, body);
 	}
 
 	/**
@@ -246,9 +284,31 @@ export class UserController extends Controller {
 	@Middlewares([contextMiddleware])
 	async updateUsername(
 		@Path() id: string,
-		@Body() body: UpdateUserUsername,
+		@Body() body: UpdateUserUsername | unknown,
 	): Promise<Result> {
-		return this.userService.updateUsername(id, body);
+		return await this.userService.updateUsername(id, body);
+	}
+
+	/**
+	 * @summary Update user picture by id
+	 */
+	@Put("/{id}/picture")
+	@SuccessResponse(200)
+	@Response(400, "BadRequest")
+	@Response(401, "Unauthorized")
+	@Response(404, "NotFound")
+	@Response(409, "Conflict")
+	@Response(422, "UnprocessableEntity")
+	@Response(429, "TooManyRequests")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
+	async updatePicture(
+		@Path() id: string,
+		@UploadedFile() file: Express.Multer.File,
+	): Promise<Result> {
+		const input = { picture: this.handleFile(file) };
+		return await this.userService.updatePicture(id, input);
 	}
 
 	/**
@@ -263,6 +323,21 @@ export class UserController extends Controller {
 	@Security("Bearer", [Role.ADMIN])
 	@Middlewares([contextMiddleware])
 	async delete(@Path() id: string): Promise<Result> {
-		return this.userService.delete(id);
+		return await this.userService.delete(id);
+	}
+
+	/**
+	 * @summary Delete user picture by id
+	 */
+	@Delete("/{id}/picture")
+	@SuccessResponse(200)
+	@Response(401, "Unauthorized")
+	@Response(404, "NotFound")
+	@Response(429, "TooManyRequests")
+	@Response(500, "InternalServerError")
+	@Security("Bearer", [Role.USER])
+	@Middlewares([contextMiddleware])
+	async deletePicture(@Path() id: string): Promise<Result> {
+		return await this.userService.deletePicture(id);
 	}
 }

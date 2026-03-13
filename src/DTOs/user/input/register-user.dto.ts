@@ -1,7 +1,3 @@
-import type { User } from "../../../types/user.type";
-
-type RegisterUserType = Omit<User.Create, "role">;
-
 export default class RegisterUser {
 	firstname: string;
 	lastname: string;
@@ -10,6 +6,5 @@ export default class RegisterUser {
 	password: string;
 	birthday: Date;
 	enable?: boolean;
+	picture?: File;
 }
-
-const _typeCheck: RegisterUserType = {} as RegisterUser;

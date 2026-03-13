@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { dateSchema, querySchema } from "../../schemas/common.schemas";
-import { roleSchema } from "../../schemas/user.schemas";
+import z from "zod";
+import { dateSchema, querySchema } from "../../../schemas/common.schemas";
+import { roleSchema } from "../../../schemas/user.schemas";
 
 export const searchUsersCodec = z
 	.object({

@@ -8,9 +8,10 @@ import {
 	type ReturnModelType,
 } from "@typegoose/typegoose";
 import type { Base } from "@typegoose/typegoose/lib/defaultClasses";
-import type { BeAnObject } from "@typegoose/typegoose/lib/types";
+import type { BeAnObject, Ref } from "@typegoose/typegoose/lib/types";
 import { type Filter, ObjectId } from "mongodb";
-import type { Types } from "mongoose";
+import type { PaginateOptions, Types } from "mongoose";
+import mongooseAutoPopulate from "mongoose-autopopulate";
 import paginatePlugin from "mongoose-paginate-v2";
 import type Search from "../DTOs/operation/output/search.dto";
 import { Role } from "../enums/role.enum";
@@ -21,14 +22,24 @@ import {
 	sorteable,
 } from "../plugins/paginated-query.plugin";
 import { updatedAtPlugin } from "../plugins/updated-at.plugin";
-import type { User as UserTypes } from "../types/user.type";
 import { hasher } from "../utils/hasher.util";
+import { File } from "./file.model";
 
 type UserModelType = ReturnModelType<typeof User, BeAnObject> &
 	PaginateModel<User>;
 
 @modelOptions({
-	schemaOptions: { versionKey: false },
+	schemaOptions: {
+		versionKey: false,
+		toJSON: {
+			virtuals: true,
+			transform: (_doc, ret) => {
+				delete ret._id;
+				delete ret.__v;
+				return ret;
+			},
+		},
+	},
 })
 @pre<User>("save", async function () {
 	const isHash = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
@@ -38,6 +49,7 @@ type UserModelType = ReturnModelType<typeof User, BeAnObject> &
 @plugin(paginatePlugin)
 @plugin(paginatedQueryPlugin, { createdAt: -1 })
 @plugin(updatedAtPlugin)
+@plugin(mongooseAutoPopulate)
 export class User implements Base {
 	_id!: Types.ObjectId;
 	id!: string;
@@ -67,6 +79,9 @@ export class User implements Base {
 	@prop({ default: Role.USER })
 	role: Role;
 
+	@prop({ ref: () => File, required: true, autopopulate: true })
+	picture: Ref<File>;
+
 	@prop({ required: true, trim: true })
 	password: string;
 
@@ -90,7 +105,8 @@ export class User implements Base {
 	@prop({ default: new Date() })
 	updatedAt: Date;
 
-	public get plain(): UserTypes.Schema {
+	public get serialize() {
+		const picture = this.picture as DocumentType<File>;
 		return {
 			id: this.id,
 			firstname: this.firstname,
@@ -99,6 +115,7 @@ export class User implements Base {
 			email: this.email,
 			role: this.role,
 			password: this.password,
+			picture,
 			birthday: this.birthday,
 			enable: this.enable,
 			createdAt: this.createdAt,
@@ -106,9 +123,12 @@ export class User implements Base {
 		};
 	}
 
-	public get secure(): UserTypes.Secure {
-		const { password, ...secure } = this.plain;
-		return secure;
+	public get secure() {
+		const { password, picture, ...rest } = this.serialize;
+		return {
+			...rest,
+			picture: picture.resource,
+		};
 	}
 
 	public async comparePassword(
@@ -135,7 +155,7 @@ export class User implements Base {
 
 	public static async search(
 		this: UserModelType,
-		input: UserTypes.Query,
+		input: Filter<User> & PaginateOptions,
 	): Promise<Search<User>> {
 		// biome-ignore lint: Need to keep 'this' context for plugin method
 		const filters = this.buildFilters(input);
@@ -144,11 +164,7 @@ export class User implements Base {
 		const options = this.getPaginationOptions(input);
 
 		// biome-ignore lint: paginate method from mongoose-paginate-v2
-		const result = await this.paginate(filters, {
-			page: options.page,
-			limit: options.limit,
-			sort: options.sort,
-		});
+		const result = await this.paginate(filters, options);
 
 		// biome-ignore lint: Need to keep 'this' context for plugin methods
 		return this.formatQuery(result, options.page, options.limit);
@@ -160,6 +176,7 @@ export class User implements Base {
 		password: string,
 	) {
 		const hash = await hasher.encrypt(password);
+
 		// biome-ignore lint: Mongoose return type handled by Typegoose
 		return await this.updateOne({ _id: id }, { password: hash });
 	}
@@ -171,6 +188,7 @@ export class User implements Base {
 	): Promise<boolean> {
 		const query: Filter<User> = { username };
 		if (id) query._id = { $ne: ObjectId.createFromHexString(id) };
+
 		// biome-ignore lint: Mongoose return type handled by Typegoose
 		const exists = await this.exists(query);
 		return exists === null;
@@ -183,6 +201,7 @@ export class User implements Base {
 	): Promise<boolean> {
 		const query: Filter<User> = { email };
 		if (id) query._id = { $ne: ObjectId.createFromHexString(id) };
+
 		// biome-ignore lint: Mongoose return type handled by Typegoose
 		const exists = await this.exists(query);
 		return exists === null;
