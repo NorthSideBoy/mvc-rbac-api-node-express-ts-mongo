@@ -48,6 +48,7 @@ Building APIs is easy; building **secure** APIs that scale in complexity is hard
 - **RBAC with role hierarchy**: e.g. `ADMIN` includes `MANAGER` includes `USER` (higher roles inherit access).
 - **Permission scopes**: `own`, `managed`, `all` for safe “self vs managed users vs everyone” rules.
 - **JWT Bearer authentication**: `Authorization: Bearer <token>`.
+- **Dedicated auth module**: login/register now live in transport + service layers scoped to `auth`.
 - **Auto-generated OpenAPI + routes** with tsoa (`src/api/rest/docs/swagger.json`, `src/api/rest/routes/routes.ts`).
 - **GraphQL API**: Apollo Server + type-graphql on `POST /graphql`.
 - **File uploads + storage**: multi-purpose upload/storage layer (currently used for user profile pictures) via REST multipart + GraphQL `Upload`, with public/private static serving.
@@ -264,28 +265,29 @@ Protected operations require the same JWT Bearer token as REST:
 
 Resolvers live in `src/api/graphql/resolvers` and use type-graphql schema classes from `src/api/graphql/schemas`.
 
-- Queries: `search`, `findById`, `getUsers`
-- Mutations: `register`, `login`, `create`, `update`, `updateStatus`, `updateRole`, `updatePassword`, `updateEmail`, `updateUsername`, `updatePicture`, `delete`
+- Auth mutations: `register`, `login`
+- User queries: `search`, `findById`, `getUsers`
+- User mutations: `create`, `update`, `updateStatus`, `updateRole`, `updatePassword`, `updateEmail`, `updateUsername`, `updatePicture`, `delete`
 
 ### File uploads
 
 This project exposes file uploads in `REST` and `GraphQL` interfaces, backed by the same storage flow.
 
-- REST endpoints with uploads: `POST /users/register`, `POST /users`, `PUT /users/:id/picture`
+- REST endpoints with uploads: `POST /auth/register`, `POST /users`, `PUT /users/:id/picture`
 - GraphQL operations with uploads: `register`, `create`, `updatePicture`
 - In GraphQL, uploads use the `Upload` scalar (via `graphql-upload`)
-- In REST, register, create, and picture updates receive the multipart field `upload`.
+- In REST, auth register, user create, and picture updates receive the multipart field `upload`.
 - Files are stored in `storage/`. `storage/public/...` is served from `GET /public/...`, while `storage/private/...` is served from `GET /private/...` (requires AUTH).
 - API responses include file metadata with a computed `url` (e.g., `user.picture.url`).
 
 ## Endpoint overview
 
-The current module is **Users** (generated docs provide full schemas and examples):
+The current public API is split into **Auth** and **Users** modules (generated docs provide full schemas and examples):
 
 | Method | Path | Description | Auth | Minimum role |
 | --- | --- | --- | --- | --- |
-| POST | `/users/register` | Register a user (multipart) | Public | - |
-| POST | `/users/login` | Login and receive a JWT | Public (rate-limited) | - |
+| POST | `/auth/register` | Register an account (multipart) | Public | - |
+| POST | `/auth/login` | Login and receive a JWT | Public (rate-limited) | - |
 | GET | `/users/search` | Search users (paginated) | Bearer JWT | `USER` |
 | GET | `/users/:id` | Get user by id | Bearer JWT | `USER` |
 | GET | `/users` | Get users | Bearer JWT | `USER` |
@@ -305,7 +307,7 @@ The current module is **Users** (generated docs provide full schemas and example
 Register:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/users/register \
+curl -X POST http://127.0.0.1:8000/auth/register \
   -F firstname=john \
   -F lastname=doe \
   -F username=johndoe \
@@ -322,7 +324,7 @@ curl -X POST http://127.0.0.1:8000/users/register \
 Login:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/users/login \
+curl -X POST http://127.0.0.1:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{ "email": "john@example.com", "password": "Password123" }'
 ```
@@ -447,30 +449,22 @@ dist/                           Compiled JavaScript output; every subfolder mirr
 ```text
 src/
   DTOs/                         Transfer contracts exchanged between layers and API boundaries.
-    file/                       DTO namespace for file-related payloads.
-      input/                    Input DTOs for file creation and update flows.
-      output/                   Output DTOs for persisted file metadata.
-    operation/                  DTO namespace for generic operation responses.
-      output/                   Output DTOs for normalized operation results.
-    storage/                    DTO namespace for low-level storage commands.
-      input/                    Input DTOs for save, read, and overwrite storage actions.
-    user/                       DTO namespace for user, auth, and user-search flows.
-      input/                    Input DTOs for register, login, search, and user mutations.
-      output/                   Output DTOs for authenticated users, users, and search responses.
+    auth/                       Authentication payloads such as login, register, and authenticated-user responses.
+    file/                       File creation, update, and persisted metadata contracts.
+    operation/                  Generic operation/result response contracts.
+    storage/                    Low-level storage command contracts.
+    user/                       User profile, search, and user-management contracts.
   api/                          Transport-layer entry points shared by REST and GraphQL.
     common/                     Shared API helpers for auth, authorization, and request context glue.
     graphql/                    GraphQL transport layer built around type-graphql.
       middlewares/              GraphQL middleware chain for auth, context, errors, and rate limiting.
       resolvers/                GraphQL resolvers and base upload-handling logic.
       schemas/                  GraphQL schema classes exposed to clients.
-        common/                 Shared GraphQL schema pieces such as pagination types.
-        file/                   GraphQL schema namespace for file resources.
-          output/               GraphQL output types for file payloads.
-        operation/              GraphQL schema namespace for generic operation responses.
-          output/               GraphQL output types for result wrappers.
-        user/                   GraphQL schema namespace for user workflows.
-          input/                GraphQL input types for auth, search, and user mutations.
-          output/               GraphQL output types for users and user-search results.
+        auth/                   Login/register schema types.
+        common/                 Shared schema pieces such as pagination types.
+        file/                   File-related schema types.
+        operation/              Generic result and operation schema types.
+        user/                   User query and mutation schema types.
     rest/                       REST transport layer built on Express and tsoa.
       controllers/              REST controllers that expose HTTP endpoints.
       docs/                     Generated OpenAPI artifacts consumed by Swagger UI.
@@ -482,15 +476,12 @@ src/
   contracts/                    Shared interfaces describing core application shapes.
   enums/                        Cross-cutting enums for roles, mime types, visibility, error codes, etc.
   errors/                       Central error hierarchy grouped by concern.
-    authorization/              Authorization and permission-denied errors.
+    application/                Domain/application-level business errors for auth, files, tokens, users, etc.
     core/                       Base abstractions for application and HTTP error types.
-    file/                       File-specific errors.
     http/                       HTTP status-oriented errors used by the REST layer.
-    token/                      Token and JWT validation errors.
-    user/                       User/account business-rule errors.
   factories/                    Factory helpers for constructing runtime objects such as native files.
   guards/                       Type guards used to safely classify runtime values and errors.
-  helpers/                      Small helper adapters reused by higher-level flows.
+  helpers/                      Small helper adapters reused by higher-level flows, including shared user/auth helpers.
   mappers/                      Transformation helpers between representations and transport shapes.
   models/                       Mongoose/Typegoose persistence models.
   plugins/                      Reusable model plugins such as pagination and timestamp helpers.
@@ -502,21 +493,16 @@ src/
     models/                     RBAC actor models and runtime authorization state.
     types/                      RBAC type helpers for actions, scopes, resources, and operations.
   security/                     Access-claims, grants, and actor helpers around authentication.
-  services/                     Application services and business-logic orchestration.
+  services/                     Application services and business-logic orchestration, including dedicated auth/user services.
   types/                        Shared TypeScript utility types used across layers.
-  utils/                        Low-level utilities for files, hashing, logging, mapping, tokens, URLs, and validation.
+  utils/                        Low-level utilities for files, hashing, logging, mapping, schema parsing, tokens, URLs, and validation.
   validation/                   Runtime validation layer built on Zod.
     codecs/                     Input/output codecs grouped by bounded area.
+      auth/                     Validation codecs for auth payloads.
       file/                     Validation codecs for file payloads.
-        input/                  File input codecs.
-        output/                 File output codecs.
       operation/                Validation codecs for generic operation payloads.
-        output/                 Operation result and pagination codecs.
       storage/                  Validation codecs for storage commands.
-        input/                  Storage input codecs.
-      user/                     Validation codecs for user and auth workflows.
-        input/                  User input codecs.
-        output/                 User output codecs.
+      user/                     Validation codecs for user workflows.
     schemas/                    Reusable primitive and domain schemas shared by codecs.
 ```
 
