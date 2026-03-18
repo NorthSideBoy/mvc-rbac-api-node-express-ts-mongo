@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "type-graphql";
-import type { AuthenticatedUser } from "../../../../../DTOs/user/output/authenticated-user.dto";
+import type { AuthenticatedUser } from "../../../../../DTOs/auth/output/authenticated-user.dto";
 import UserGQL from "../../user/output/user.schema";
 
 @ObjectType("AuthenticatedUser")

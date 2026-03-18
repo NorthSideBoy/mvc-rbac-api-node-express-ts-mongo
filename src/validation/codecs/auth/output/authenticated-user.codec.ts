@@ -1,6 +1,6 @@
 import z from "zod";
 import { jwtSchema } from "../../../schemas/common.schemas";
-import { userCodec } from "./user.codec";
+import { userCodec } from "../../user/output/user.codec";
 
 export const authenticatedUserCodec = z
 	.object({
