@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import z from "zod";
 
@@ -12,23 +13,30 @@ const toNumber = () =>
 		});
 
 const envSchema = z.object({
-	// Server Configuration
+	// Common
 	HOST: z.string().default("127.0.0.1"),
 	NODE_ENV: z.enum(["development", "production"]).default("development"),
 	PORT: toNumber().default(3000),
 	LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("debug"),
 
-	// Database Configuration
+	// Database configuration
 	DB_HOST: z.string().default("127.0.0.1"),
 	DB_PORT: toNumber().default(27017),
-	DB_NAME: z.string(),
-	DB_USER: z.string(),
-	DB_PASSWORD: z.string(),
+	DB_NAME: z.string().nonempty(),
+	DB_USER: z.string().nonempty(),
+	DB_PASSWORD: z.string().nonempty(),
 	DB_AUTH_SOURCE: z.string().default("admin"),
 	DATABASE_URL: z.string(),
 
+	// Socket.io admin-ui
+	SOCKET_ADMIN_USERNAME: z.string().nonempty(),
+	SOCKET_ADMIN_PASSWORD: z
+		.string()
+		.nonempty()
+		.transform((val) => bcrypt.hashSync(val, 10)),
+
 	// JWT Configuration
-	JWT_SECRET: z.string().nonempty({ message: "JWT secret is required" }),
+	JWT_SECRET: z.string().nonempty(),
 	JWT_EXPIRES_IN: z
 		.string()
 		.regex(/^\d+(ms|s|m|h|d|w)$/, {
@@ -36,13 +44,14 @@ const envSchema = z.object({
 		})
 		.default("1h"),
 
-	// CORS Configuration
+	// Cors
 	CORS_ORIGIN: z.string().default("*"),
 
-	// Rate Limiting Configuration
+	// Rate Limit
 	RATE_LIMIT_WINDOW: toNumber().default(15),
 	RATE_LIMIT_MAX: toNumber().default(500),
 
+	// File
 	MAX_FILE_SIZE: toNumber().default(5),
 });
 
@@ -100,6 +109,10 @@ export const config = Object.freeze({
 			uri: databaseUrl,
 			maskedUri: maskedDatabaseUrl,
 		},
+	},
+	socketAdmin: {
+		username: env.SOCKET_ADMIN_USERNAME,
+		password: env.SOCKET_ADMIN_PASSWORD,
 	},
 	jwt: {
 		secret: env.JWT_SECRET,

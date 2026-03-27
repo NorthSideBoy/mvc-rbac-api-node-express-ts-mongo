@@ -34,10 +34,15 @@ const io = new Server(server, {
 	cors: {
 		origin: config.cors.origin,
 		methods: ["GET", "POST"],
+		credentials: config.server.isProduction,
 	},
 });
 instrument(io, {
-	auth: false,
+	auth: {
+		type: "basic",
+		username: config.socketAdmin.username,
+		password: config.socketAdmin.password,
+	},
 	mode: config.server.nodeEnv,
 	namespaceName: "/admin",
 });

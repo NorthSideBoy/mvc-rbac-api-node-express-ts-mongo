@@ -17,8 +17,6 @@ import ResultGQL from "../schemas/operation/output/result.schema";
 // biome-ignore lint: GQL schemas should not be type
 import CreateUserGQL from "../schemas/user/input/create-user.schema";
 // biome-ignore lint: GQL schemas should not be type
-import QueryUsersGQL from "../schemas/user/input/query-users.schema";
-// biome-ignore lint: GQL schemas should not be type
 import UpdateUserEmailGQL from "../schemas/user/input/update-user-email.schema";
 // biome-ignore lint: GQL schemas should not be type
 import UpdateUserPasswordGQL from "../schemas/user/input/update-user-passoword.schema";
