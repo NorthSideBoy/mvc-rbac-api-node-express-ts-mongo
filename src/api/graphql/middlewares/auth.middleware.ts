@@ -1,7 +1,7 @@
 import type { MiddlewareFn } from "type-graphql";
 import type { Role } from "../../../enums/role.enum";
-import type { GraphQLContext } from "../../../types/graphql-context.type";
-import { authorize } from "../../common/auth.common";
+import { authorize } from "../../common/utils/auth.util";
+import type { GraphQLContext } from "../types/graphql-context.type";
 
 export function authGuard(
 	securityName: string,

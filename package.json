@@ -32,6 +32,7 @@
 	"dependencies": {
 		"@apollo/server": "^5.4.0",
 		"@as-integrations/express5": "^1.1.2",
+		"@socket.io/admin-ui": "^0.5.1",
 		"@tsoa/runtime": "^7.0.0-alpha.0",
 		"@typegoose/typegoose": "^13.1.0",
 		"bcrypt": "^6.0.0",
@@ -53,6 +54,7 @@
 		"pino": "^10.3.1",
 		"pino-http": "^11.0.0",
 		"rate-limiter-flexible": "^9.1.1",
+		"socket.io": "^4.8.3",
 		"swagger-ui-express": "^5.0.1",
 		"tsoa": "^7.0.0-alpha.0",
 		"type-graphql": "^2.0.0-rc.3",

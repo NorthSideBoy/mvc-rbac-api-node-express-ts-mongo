@@ -1,10 +1,10 @@
-import type { Role } from "../../enums/role.enum";
-import MethodNotAllowedError from "../../errors/http/method-not-allowed.error";
-import UnauthorizedError from "../../errors/http/unauthorized.error";
-import { isApplicationError, isHttpError } from "../../guards/error.guard";
-import { AccessClaims } from "../../security/access-claims";
-import { AccessGrant } from "../../security/access-grant";
-import { tokenizer } from "../../utils/tokenizer.util";
+import type { Role } from "../../../enums/role.enum";
+import MethodNotAllowedError from "../../../errors/http/method-not-allowed.error";
+import UnauthorizedError from "../../../errors/http/unauthorized.error";
+import { isApplicationError, isHttpError } from "../../../guards/error.guard";
+import { AccessClaims } from "../../../security/access-claims";
+import { AccessGrant } from "../../../security/access-grant";
+import { tokenizer } from "../../../utils/tokenizer.util";
 
 type AuthStrategy = (
 	authHeader: string,

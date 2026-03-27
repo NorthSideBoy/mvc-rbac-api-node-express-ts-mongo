@@ -4,7 +4,7 @@ import TooManyRequestsError from "../../../errors/http/to-many-requests.error";
 
 export const generalLimiter = rateLimit({
 	windowMs: config.rateLimit.windowMs * 60 * 1000,
-	max: config.rateLimit.windowMs,
+	max: config.rateLimit.max,
 	standardHeaders: true,
 	legacyHeaders: false,
 	handler: () => {

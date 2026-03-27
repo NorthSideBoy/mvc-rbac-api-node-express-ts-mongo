@@ -1,6 +1,6 @@
 import type { MiddlewareFn } from "type-graphql";
-import type { GraphQLContext } from "../../../types/graphql-context.type";
-import { contextualize } from "../../common/context.common";
+import { contextualize } from "../../common/utils/context.util";
+import type { GraphQLContext } from "../types/graphql-context.type";
 
 export function contextMiddleware(): MiddlewareFn<GraphQLContext> {
 	return async ({ context }, next) => {

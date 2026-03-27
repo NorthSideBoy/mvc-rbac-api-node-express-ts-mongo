@@ -17,7 +17,10 @@ class EventBus extends EventEmitter {
 		event: Event<K>,
 		context: ExecutionContext,
 	): boolean {
-		logger.info({ event }, `[EventBus] ${event.name} event emitted`);
+		logger.info(
+			{ event, actor: context.actor.audit },
+			`[EventBus] emitting event: ${event.name}`,
+		);
 		return this.emit(event.name, event, context);
 	}
 
@@ -29,7 +32,10 @@ class EventBus extends EventEmitter {
 			event: Event<K>,
 			context: ExecutionContext,
 		): void => {
-			logger.info({ event }, `[EventBus] ${name} event listened`);
+			logger.info(
+				{ event, actor: context.actor.audit },
+				`[EventBus] listening event: ${name}`,
+			);
 			listener(event, context);
 		};
 

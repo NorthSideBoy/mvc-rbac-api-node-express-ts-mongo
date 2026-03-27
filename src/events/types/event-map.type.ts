@@ -14,18 +14,19 @@ type UserRef = UserId & Pick<IUser, "role" | "username">;
 
 export interface EventMap {
 	//Auth
-	[EVENTS.AUTH_USER_LOGGED_IN]: AuthRef;
-	[EVENTS.AUTH_USER_REGISTERED]: AuthRef;
+	[EVENTS.AUTH.ACCOUNT_REGISTERED]: AuthRef;
+	[EVENTS.AUTH.ACCOUNT_LOGGED_IN]: AuthRef;
 
 	//User
-	[EVENTS.USER_CREATED]: UserRef;
-	[EVENTS.USER_DELETED]: UserRef;
-	[EVENTS.USER_EMAIL_UPDATED]: UserId & UpdateUserEmail;
-	[EVENTS.USER_PASSWORD_UPDATED]: UserId & UpdateUserPassword;
-	[EVENTS.USER_PICTURE_DELETED]: UserRef & { pictureId: string };
-	[EVENTS.USER_PICTURE_UPDATED]: UserId & { pictureId: string };
-	[EVENTS.USER_PROFILE_UPDATED]: UserId & UpdateUserProfile;
-	[EVENTS.USER_ROLE_UPDATED]: UserId & UpdateUserRole;
-	[EVENTS.USER_STATUS_UPDATED]: UserId & UpdateUserStatus;
-	[EVENTS.USER_USERNAME_UPDATED]: UserId & UpdateUserUsername;
+	[EVENTS.USER.READED]: UserRef;
+	[EVENTS.USER.CREATED]: UserRef;
+	[EVENTS.USER.DELETED]: UserRef;
+	[EVENTS.USER.EMAIL_UPDATED]: UserId & UpdateUserEmail;
+	[EVENTS.USER.PASSWORD_UPDATED]: UserId & UpdateUserPassword;
+	[EVENTS.USER.PICTURE_DELETED]: UserRef & { pictureId: string };
+	[EVENTS.USER.PICTURE_UPDATED]: UserId & { pictureId: string };
+	[EVENTS.USER.PROFILE_UPDATED]: UserId & UpdateUserProfile;
+	[EVENTS.USER.ROLE_UPDATED]: UserId & UpdateUserRole;
+	[EVENTS.USER.STATUS_UPDATED]: UserId & UpdateUserStatus;
+	[EVENTS.USER.USERNAME_UPDATED]: UserId & UpdateUserUsername;
 }

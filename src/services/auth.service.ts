@@ -37,7 +37,7 @@ export default class AuthService extends BaseService {
 		if (!isValid) throw new InvalidUserCredentialsError();
 		const token = tokenizer.sign(user.sign);
 		const authenticated = this.toAuthenticated(user.dto(), token);
-		this.emit(EVENTS.AUTH_USER_LOGGED_IN, {
+		this.emit(EVENTS.AUTH.ACCOUNT_LOGGED_IN, {
 			id: authenticated.id,
 			token: authenticated.token,
 		});

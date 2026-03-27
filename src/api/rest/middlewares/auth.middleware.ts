@@ -1,7 +1,7 @@
 import type { Role } from "../../../enums/role.enum";
 import type { AccessGrant } from "../../../security/access-grant";
-import type { ExtendedRequest } from "../../../types/extended-request.type";
-import { authorize } from "../../common/auth.common";
+import type { ExtendedRequest } from "../../common/types/extended-request.type";
+import { authorize } from "../../common/utils/auth.util";
 
 export async function expressAuthentication(
 	request: ExtendedRequest,

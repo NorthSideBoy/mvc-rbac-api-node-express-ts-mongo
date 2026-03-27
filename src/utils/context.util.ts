@@ -8,8 +8,15 @@ export const context = {
 		return storage.getStore() ?? ExecutionContext.anonymous();
 	},
 
-	run(context: ExecutionContext, fn: () => void): void {
-		storage.run(context, fn);
+	run<T>(context: ExecutionContext, fn: () => T): T {
+		return storage.run(context, fn);
+	},
+
+	async runAsync<T>(
+		context: ExecutionContext,
+		fn: () => Promise<T>,
+	): Promise<T> {
+		return await storage.run(context, fn);
 	},
 
 	set(context: ExecutionContext): void {

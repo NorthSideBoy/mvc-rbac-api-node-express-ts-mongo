@@ -2,7 +2,7 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import type { MiddlewareFn } from "type-graphql";
 import { config } from "../../../configs/env.config";
 import TooManyRequestsError from "../../../errors/http/to-many-requests.error";
-import type { GraphQLContext } from "../../../types/graphql-context.type";
+import type { GraphQLContext } from "../types/graphql-context.type";
 
 const rateLimiter = new RateLimiterMemory({
 	points: 5,

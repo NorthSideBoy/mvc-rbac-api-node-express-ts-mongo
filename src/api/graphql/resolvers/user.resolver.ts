@@ -10,7 +10,6 @@ import {
 } from "type-graphql";
 import { Role } from "../../../enums/role.enum";
 import UserService from "../../../services/user.service";
-import type { GraphQLContext } from "../../../types/graphql-context.type";
 import { mapper } from "../../../utils/mapper.util";
 import { authGuard } from "../middlewares/auth.middleware";
 import { contextMiddleware } from "../middlewares/context.middleware";
@@ -34,6 +33,7 @@ import UpdateUserStatusGQL from "../schemas/user/input/update-user-status.scehma
 import UpdateUserUsernameGQL from "../schemas/user/input/update-user-username.schema";
 import UserGQL from "../schemas/user/output/user.schema";
 import UsersSearchGQL from "../schemas/user/output/users-search.schema";
+import type { GraphQLContext } from "../types/graphql-context.type";
 import BaseResolver from "./base.resolver";
 
 @Resolver()

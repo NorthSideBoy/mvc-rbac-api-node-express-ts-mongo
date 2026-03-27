@@ -1,5 +1,5 @@
-import ExecutionContext from "../../context/execution-context";
-import type { AccessGrant } from "../../security/access-grant";
+import ExecutionContext from "../../../context/execution-context";
+import type { AccessGrant } from "../../../security/access-grant";
 
 export function contextualize(
 	access: AccessGrant | undefined,

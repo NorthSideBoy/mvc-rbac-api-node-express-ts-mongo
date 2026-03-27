@@ -56,7 +56,7 @@ export default class UserService extends BaseService {
 		await this.userHelper.validateUserUniqueness(decoded);
 		const pictureId = await this.userHelper.processUserPicture(decoded.picture);
 		const user = await User.create({ ...decoded, picture: pictureId });
-		this.emit(EVENTS.USER_CREATED, {
+		this.emit(EVENTS.USER.CREATED, {
 			id: user.id,
 			username: user.username,
 			role: user.role,
@@ -69,6 +69,12 @@ export default class UserService extends BaseService {
 		this.can(OPERATIONS.USER_READ);
 		const user = await User.findById(id);
 		if (!user) return null;
+
+		this.emit(EVENTS.USER.READED, {
+			id: user.id,
+			username: user.username,
+			role: user.role,
+		});
 
 		return user.dto();
 	}
@@ -99,6 +105,13 @@ export default class UserService extends BaseService {
 		const user = await this.getUserByIdOrThrow(id);
 		this.canManage(OPERATIONS.USER_UPDATE_PROFILE, user);
 		const operation = await User.updateOne({ _id: id }, decoded);
+
+		this.emit(EVENTS.USER.PROFILE_UPDATED, {
+			id,
+			firstname: decoded.firstname,
+			lastname: decoded.lastname,
+			birthday: decoded.birthday,
+		});
 
 		return result(operation.modifiedCount);
 	}

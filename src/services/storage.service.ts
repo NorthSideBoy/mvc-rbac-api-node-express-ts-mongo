@@ -4,7 +4,7 @@ import type { OverwriteFile } from "../DTOs/storage/input/overwrite-file.dto";
 import type { ReadFile } from "../DTOs/storage/input/read-file.dto";
 import type { SaveFile } from "../DTOs/storage/input/save-file.dto";
 import FileNotFoundError from "../errors/application/file-not-found.error";
-import { makeFile } from "../factories/file.factory";
+import { createFile } from "../factories/file.factory";
 import { isApplicationError } from "../guards/error.guard";
 import { extToMimetype } from "../mappers/mimetype.mapper";
 import { file as fileUtil } from "../utils/file.util";
@@ -60,9 +60,8 @@ export default class StorageService extends BaseService {
 		const extension = path.extname(fullPath).slice(1);
 		const mimetype = extToMimetype(extension);
 
-		return makeFile(buffer, path.basename(fullPath), {
+		return createFile(buffer, path.basename(fullPath), {
 			type: mimetype,
-			lastModified: Date.now(),
 		});
 	}
 

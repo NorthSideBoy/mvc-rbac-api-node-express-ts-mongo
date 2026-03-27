@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
-import type { ExtendedRequest } from "../../../types/extended-request.type";
 import { context } from "../../../utils/context.util";
-import { contextualize } from "../../common/context.common";
+import type { ExtendedRequest } from "../../common/types/extended-request.type";
+import { contextualize } from "../../common/utils/context.util";
 
 export const contextMiddleware: RequestHandler = (
 	request: ExtendedRequest,

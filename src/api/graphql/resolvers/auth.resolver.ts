@@ -12,7 +12,7 @@ import AuthenticatedUserGQL from "../schemas/auth/output/authenticated-user.sche
 import BaseResolver from "./base.resolver";
 
 @Resolver()
-export default class UserResolver extends BaseResolver {
+export default class AuthResolver extends BaseResolver {
 	private readonly authService = new AuthService();
 
 	@Mutation(() => AuthenticatedUserGQL)

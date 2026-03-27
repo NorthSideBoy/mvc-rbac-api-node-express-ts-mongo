@@ -15,11 +15,11 @@ export abstract class BaseListener {
 	): void {
 		const unsubscribe = eventBus.subscribe(name, async (event, context) => {
 			try {
-				logger.info(`[EventBus] Processing event: ${String(name)}`);
+				logger.info(`[EventBus] processing event: ${String(name)}`);
 				await handler(event, context);
-				logger.info(`[EventBus] Successfully processed event: ${String(name)}`);
+				logger.info(`[EventBus] successfully processed event: ${String(name)}`);
 			} catch (error) {
-				logger.error(`[EventBus] Error processing event: ${String(name)}`);
+				logger.error(`[EventBus] error processing event: ${String(name)}`);
 				throw error;
 			}
 		});

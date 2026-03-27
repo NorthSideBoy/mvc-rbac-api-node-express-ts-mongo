@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import type { FileUpload } from "graphql-upload/processRequest.mjs";
 import { lookup } from "mime-types";
-import { makeFile } from "../../../factories/file.factory";
+import { createFile } from "../../../factories/file.factory";
 
 export default class BaseResolver {
 	private async streamToBuffer(stream: Readable): Promise<Buffer> {
@@ -22,9 +22,8 @@ export default class BaseResolver {
 		const buffer = await this.streamToBuffer(stream);
 		const mimetype = lookup(fileUpload.filename) || fileUpload.mimetype;
 
-		return makeFile(buffer, fileUpload.filename, {
+		return createFile(buffer, fileUpload.filename, {
 			type: mimetype,
-			lastModified: Date.now(),
 		});
 	}
 }
