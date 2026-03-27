@@ -13,7 +13,6 @@ import UserService from "../../../services/user.service";
 import { mapper } from "../../../utils/mapper.util";
 import { authGuard } from "../middlewares/auth.middleware";
 import { contextMiddleware } from "../middlewares/context.middleware";
-import PaginationGQL from "../schemas/common/pagination.schema";
 import ResultGQL from "../schemas/operation/output/result.schema";
 // biome-ignore lint: GQL schemas should not be type
 import CreateUserGQL from "../schemas/user/input/create-user.schema";
@@ -32,7 +31,6 @@ import UpdateUserStatusGQL from "../schemas/user/input/update-user-status.scehma
 // biome-ignore lint: GQL schemas should not be type
 import UpdateUserUsernameGQL from "../schemas/user/input/update-user-username.schema";
 import UserGQL from "../schemas/user/output/user.schema";
-import UsersSearchGQL from "../schemas/user/output/users-search.schema";
 import type { GraphQLContext } from "../types/graphql-context.type";
 import BaseResolver from "./base.resolver";
 
@@ -58,21 +56,6 @@ export default class UserResolver extends BaseResolver {
 		const userService = new UserService(ctx.req.context);
 		const result = await userService.findAll();
 		const gql = result.map((item) => mapper.toClass(UserGQL, item));
-
-		return gql;
-	}
-
-	@Query(() => UsersSearchGQL)
-	@UseMiddleware([authGuard("Bearer", [Role.USER]), contextMiddleware()])
-	async search(
-		@Ctx() ctx: GraphQLContext,
-		@Arg("query", { nullable: true }) query?: QueryUsersGQL,
-	): Promise<UsersSearchGQL> {
-		const userService = new UserService(ctx.req.context);
-		const result = await userService.search(query ?? {});
-		const docs = result.docs.map((item) => mapper.toClass(UserGQL, item));
-		const pagination = mapper.toClass(PaginationGQL, result.pagination);
-		const gql = mapper.toClass(UsersSearchGQL, { docs, pagination });
 
 		return gql;
 	}

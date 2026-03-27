@@ -7,7 +7,6 @@ import {
 	Path,
 	Post,
 	Put,
-	Queries,
 	Response,
 	Route,
 	Security,
@@ -16,7 +15,6 @@ import {
 	UploadedFile,
 } from "tsoa";
 import type Result from "../../../DTOs/operation/output/result.dto";
-import type { QueryUsers } from "../../../DTOs/user/input/query-users.dto";
 import type { UpdateUserEmail } from "../../../DTOs/user/input/update-user-email.dto";
 import type { UpdateUserPassword } from "../../../DTOs/user/input/update-user-password.dto";
 import type { UpdateUserProfile } from "../../../DTOs/user/input/update-user-profile.dto";
@@ -24,7 +22,6 @@ import type { UpdateUserRole } from "../../../DTOs/user/input/update-user-role.d
 import type { UpdateUserStatus } from "../../../DTOs/user/input/update-user-status.dto";
 import type { UpdateUserUsername } from "../../../DTOs/user/input/update-user-username.dto";
 import type { User } from "../../../DTOs/user/output/user.dto";
-import type { UsersSearch } from "../../../DTOs/user/output/users-search";
 import { Role, type UpdateRole } from "../../../enums/role.enum";
 import UserService from "../../../services/user.service";
 import { contextMiddleware } from "../middlewares/context.middleware";
@@ -34,21 +31,6 @@ import { BaseController } from "./base.controller";
 @Tags("Users")
 export class UserController extends BaseController {
 	private readonly userService = new UserService();
-
-	/**
-	 * @summary Search users
-	 */
-	@Get("/search")
-	@SuccessResponse(200)
-	@Response(401, "Unauthorized")
-	@Response(422, "UnprocessableEntity")
-	@Response(429, "TooManyRequests")
-	@Response(500, "InternalServerError")
-	@Security("Bearer", [Role.USER])
-	@Middlewares([contextMiddleware])
-	async search(@Queries() query: QueryUsers): Promise<UsersSearch> {
-		return await this.userService.search(query);
-	}
 
 	/**
 	 * @summary Get user by id

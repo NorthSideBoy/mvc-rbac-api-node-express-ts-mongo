@@ -1,7 +1,6 @@
 import { result } from "../builders/result.builder";
 import type Result from "../DTOs/operation/output/result.dto";
 import type { CreateUser } from "../DTOs/user/input/create-user.dto";
-import type { QueryUsers } from "../DTOs/user/input/query-users.dto";
 import type { UpdateUserEmail } from "../DTOs/user/input/update-user-email.dto";
 import type { UpdateUserPassword } from "../DTOs/user/input/update-user-password.dto";
 import type { UpdateUserPicture } from "../DTOs/user/input/update-user-picture.dto";
@@ -10,7 +9,6 @@ import type { UpdateUserRole } from "../DTOs/user/input/update-user-role.dto";
 import type { UpdateUserStatus } from "../DTOs/user/input/update-user-status.dto";
 import type { UpdateUserUsername } from "../DTOs/user/input/update-user-username.dto";
 import type { User as DTO } from "../DTOs/user/output/user.dto";
-import type { UsersSearch } from "../DTOs/user/output/users-search";
 import { DuplicatePasswordError } from "../errors/application/duplicate-password.error";
 import { EmailInUseError } from "../errors/application/email-in-use.error";
 import { UserNotFoundError } from "../errors/application/user-not-found.error";
@@ -25,7 +23,6 @@ import Actor from "../rbac/models/actor.model";
 import { file as fileUtil } from "../utils/file.util";
 import { decode } from "../utils/validator.util";
 import { createUserCodec } from "../validation/codecs/user/input/create-user.codec";
-import { searchUsersCodec } from "../validation/codecs/user/input/search-users.codec";
 import { updateUserEmailCodec } from "../validation/codecs/user/input/update-user-email.codec";
 import { updateUserPasswordCodec } from "../validation/codecs/user/input/update-user-password.codec";
 import { updateUserPictureCodec } from "../validation/codecs/user/input/update-user-picture.codec";
@@ -84,17 +81,6 @@ export default class UserService extends BaseService {
 		const users = await User.find();
 
 		return users.map((user) => user.dto());
-	}
-
-	async search(input: QueryUsers | unknown): Promise<UsersSearch> {
-		const decoded = decode<QueryUsers>(searchUsersCodec, input);
-		this.can(OPERATIONS.USER_READ);
-		const result = await User.search(decoded);
-
-		return {
-			docs: result.docs.map((user) => user.dto()),
-			pagination: result.pagination,
-		};
 	}
 
 	async updateProfile(

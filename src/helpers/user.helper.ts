@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+import type { Types } from "mongoose";
 import type { RegisterUser } from "../DTOs/auth/input/register-user.dto";
 import type { CreateFile } from "../DTOs/file/input/create-file.dto";
 import type { File as FileDTO } from "../DTOs/file/output/file.dto";
@@ -49,12 +51,13 @@ export default class UserHelper {
 		});
 	}
 
-	async getDefaultPictureId(): Promise<string> {
+	async getDefaultPictureId(): Promise<Types.ObjectId> {
 		const existingPicture = await this.findDefaultPicture();
-		if (existingPicture) return existingPicture.id;
+		if (existingPicture)
+			return ObjectId.createFromHexString(existingPicture.id);
 		const defaultPicture = await this.createDefaultPicture();
 
-		return defaultPicture.id;
+		return ObjectId.createFromHexString(defaultPicture.id);
 	}
 
 	async saveUserPicture(file: File): Promise<CreateFile> {
@@ -74,12 +77,12 @@ export default class UserHelper {
 		};
 	}
 
-	async processUserPicture(file?: File): Promise<string> {
+	async processUserPicture(file?: File): Promise<Types.ObjectId> {
 		if (!file) return this.getDefaultPictureId();
 		const pictureData = await this.saveUserPicture(file);
 		const created = await this.fileService.create(pictureData);
 
-		return created.id;
+		return ObjectId.createFromHexString(created.id);
 	}
 
 	isDefaultPicture(filename: string): boolean {

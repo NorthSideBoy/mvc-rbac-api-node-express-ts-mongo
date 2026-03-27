@@ -288,7 +288,6 @@ The current public API is split into **Auth** and **Users** modules (generated d
 | --- | --- | --- | --- | --- |
 | POST | `/auth/register` | Register an account (multipart) | Public | - |
 | POST | `/auth/login` | Login and receive a JWT | Public (rate-limited) | - |
-| GET | `/users/search` | Search users (paginated) | Bearer JWT | `USER` |
 | GET | `/users/:id` | Get user by id | Bearer JWT | `USER` |
 | GET | `/users` | Get users | Bearer JWT | `USER` |
 | POST | `/users` | Create user (multipart) | Bearer JWT | `MANAGER` |

@@ -11,19 +11,12 @@ import type { Base } from "@typegoose/typegoose/lib/defaultClasses";
 import type { BeAnObject, Ref } from "@typegoose/typegoose/lib/types";
 import { Expose, Type } from "class-transformer";
 import { type Filter, ObjectId } from "mongodb";
-import type { PaginateOptions, Types } from "mongoose";
+import type { Types } from "mongoose";
 import mongooseAutoPopulate from "mongoose-autopopulate";
 import paginatePlugin from "mongoose-paginate-v2";
 import type { User as DTO } from "../DTOs/user/output/user.dto";
 import { Role } from "../enums/role.enum";
-import {
-	filterable,
-	type PaginateModel,
-	paginatedQueryPlugin,
-	sorteable,
-} from "../plugins/paginated-query.plugin";
 import { updatedAtPlugin } from "../plugins/updated-at.plugin";
-import type Search from "../types/search.type";
 import type { Token } from "../types/token.type";
 import { hasher } from "../utils/hasher.util";
 import { mapper } from "../utils/mapper.util";
@@ -31,8 +24,7 @@ import { decode } from "../utils/validator.util";
 import { userCodec } from "../validation/codecs/user/output/user.codec";
 import { File } from "./file.model";
 
-type UserModelType = ReturnModelType<typeof User, BeAnObject> &
-	PaginateModel<User>;
+type UserModelType = ReturnModelType<typeof User, BeAnObject>;
 
 @modelOptions({
 	schemaOptions: {
@@ -53,7 +45,6 @@ type UserModelType = ReturnModelType<typeof User, BeAnObject> &
 		this.password = await hasher.encrypt(this.password);
 })
 @plugin(paginatePlugin)
-@plugin(paginatedQueryPlugin, { createdAt: -1 })
 @plugin(updatedAtPlugin)
 @plugin(mongooseAutoPopulate)
 export class User implements Base {
@@ -63,32 +54,22 @@ export class User implements Base {
 	id!: string;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ required: true, trim: true })
 	firstname: string;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ required: true, trim: true })
 	lastname: string;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ required: true, trim: true, unique: true })
 	username: string;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ required: true, trim: true, unique: true })
 	email: string;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ default: Role.USER })
 	role: Role;
 
@@ -101,26 +82,18 @@ export class User implements Base {
 	password: string;
 
 	@Expose()
-	@filterable({ range: true })
-	@sorteable()
 	@prop({ required: true })
 	birthday: Date;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ default: false })
 	enable: boolean;
 
 	@Expose()
-	@filterable({ range: true })
-	@sorteable()
 	@prop({ default: new Date() })
 	createdAt: Date;
 
 	@Expose()
-	@filterable()
-	@sorteable()
 	@prop({ default: new Date() })
 	updatedAt: Date;
 
@@ -158,26 +131,6 @@ export class User implements Base {
 	static async findOneByRole(this: UserModelType, role: Role) {
 		// biome-ignore lint: Mongoose return type handled by Typegoose
 		return await this.findOne({ role });
-	}
-
-	public static async search(
-		this: UserModelType,
-		input: Filter<User> & PaginateOptions,
-	): Promise<Search<DocumentType<User>>> {
-		// biome-ignore lint: Need to keep 'this' context for plugin method
-		const filters = this.buildFilters(input);
-
-		// biome-ignore lint: Need to keep 'this' context for plugin methods
-		const options = this.getPaginationOptions(input);
-
-		// biome-ignore lint: paginate method from mongoose-paginate-v2
-		const result = await this.paginate(filters, {
-			...options,
-			lean: false,
-		});
-
-		// biome-ignore lint: Need to keep 'this' context for plugin methods
-		return this.formatQuery(result, options.page, options.limit);
 	}
 
 	static async updatePassword(
